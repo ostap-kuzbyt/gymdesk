@@ -7,12 +7,14 @@
     "dev": "tsx watch --env-file-if-exists=../../.env src/server.ts",
     "build": "tsup src/server.ts --format esm --target node24 --clean",
     "start": "node --env-file-if-exists=../../.env dist/server.js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "devDependencies": {
     "@types/node": "^24.19.2",
     "tsup": "^8.5.1",
-    "tsx": "^4.23.15"
+    "tsx": "^4.23.15",
+    "vitest": "^5.0.4"
   },
   "dependencies": {
     "fastify": "^5.12.7",
