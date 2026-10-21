@@ -18,10 +18,15 @@ export interface NewTariff {
   name: string;
   priceCents: number;
   durationDays: number;
-  visitLimit?: number | null;
+  visitLimit?: number | null | undefined;
 }
 
-export type TariffChanges = Partial<NewTariff>;
+export interface TariffChanges {
+  name?: string | undefined;
+  priceCents?: number | undefined;
+  durationDays?: number | undefined;
+  visitLimit?: number | null | undefined;
+}
 
 type TariffTerms = Pick<TariffSnapshot, "name" | "priceCents" | "durationDays" | "visitLimit">;
 
@@ -76,11 +81,11 @@ export class Tariff {
 
   change(changes: TariffChanges): void {
     this.assertActive();
-    const { visitLimit, ...rest } = changes;
     const terms = validateTerms({
-      ...this.snapshot,
-      ...rest,
-      visitLimit: visitLimit === undefined ? this.snapshot.visitLimit : visitLimit,
+      name: changes.name ?? this.snapshot.name,
+      priceCents: changes.priceCents ?? this.snapshot.priceCents,
+      durationDays: changes.durationDays ?? this.snapshot.durationDays,
+      visitLimit: changes.visitLimit === undefined ? this.snapshot.visitLimit : changes.visitLimit,
     });
     this.snapshot = { ...this.snapshot, ...terms };
   }
