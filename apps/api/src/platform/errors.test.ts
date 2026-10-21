@@ -9,7 +9,7 @@ import { ConflictError, DomainError, NotFoundError } from "./errors.js";
 let app: FastifyInstance;
 
 beforeEach(() => {
-  app = buildApp(loadConfig({ NODE_ENV: "test" }));
+  app = buildApp(loadConfig({ NODE_ENV: "test", DATABASE_URL: "postgres://localhost/test" }));
   app.get("/domain", async () => {
     throw new DomainError("Subscription has already expired");
   });

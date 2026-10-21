@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app.js";
 import { loadConfig } from "./config.js";
 
-const app = buildApp(loadConfig({ NODE_ENV: "test" }));
+const app = buildApp(loadConfig({ NODE_ENV: "test", DATABASE_URL: "postgres://localhost/test" }));
 
 afterEach(async () => {
   await app.close();

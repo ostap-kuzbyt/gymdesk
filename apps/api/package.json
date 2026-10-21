@@ -8,17 +8,23 @@
     "build": "tsup src/server.ts --format esm --target node24 --clean",
     "start": "node --env-file-if-exists=../../.env dist/server.js",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "db:generate": "node --env-file-if-exists=../../.env ../../node_modules/.bin/drizzle-kit generate",
+    "db:migrate": "node --env-file-if-exists=../../.env ../../node_modules/.bin/drizzle-kit migrate"
   },
   "devDependencies": {
     "@types/node": "^24.19.2",
+    "@types/pg": "^8.23.1",
+    "drizzle-kit": "^0.31.11",
     "tsup": "^8.5.1",
     "tsx": "^4.23.15",
     "vitest": "^5.0.4"
   },
   "dependencies": {
+    "drizzle-orm": "^0.45.4",
     "fastify": "^5.12.7",
     "fastify-type-provider-zod": "^7.0.0",
+    "pg": "^8.23.1",
     "zod": "^4.6.7"
   }
 }
