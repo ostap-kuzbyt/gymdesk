@@ -10,9 +10,11 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "db:generate": "node --env-file-if-exists=../../.env ../../node_modules/.bin/drizzle-kit generate",
-    "db:migrate": "node --env-file-if-exists=../../.env ../../node_modules/.bin/drizzle-kit migrate"
+    "db:migrate": "node --env-file-if-exists=../../.env ../../node_modules/.bin/drizzle-kit migrate",
+    "test:unit": "vitest run --project unit"
   },
   "devDependencies": {
+    "@testcontainers/postgresql": "^12.2.1",
     "@types/node": "^24.19.2",
     "@types/pg": "^8.23.1",
     "drizzle-kit": "^0.31.11",
