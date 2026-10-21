@@ -34,3 +34,21 @@ export const tariffs = pgTable(
     ),
   ],
 );
+
+export const studios = pgTable(
+  "studios",
+  {
+    id: uuid("id").primaryKey(),
+    name: text("name").notNull(),
+    capacity: integer("capacity").notNull(),
+    archived: boolean("archived").notNull().default(false),
+    version: integer("version").notNull().default(1),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("studios_active_name_unique")
+      .on(sql`lower(${table.name})`)
+      .where(sql`not ${table.archived}`),
+    check("studios_capacity_in_range", sql`${table.capacity} between 1 and 500`),
+  ],
+);

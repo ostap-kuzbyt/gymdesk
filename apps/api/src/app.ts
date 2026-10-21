@@ -1,6 +1,8 @@
 import Fastify from "fastify";
 import type { FastifyInstance } from "fastify";
 import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
+import { studioRoutes } from "./modules/studios/studio.routes.js";
+import { StudioService } from "./modules/studios/studio.service.js";
 import { tariffRoutes } from "./modules/tariffs/tariff.routes.js";
 import { TariffService } from "./modules/tariffs/tariff.service.js";
 import { createAuth0Verifier, registerAuth } from "./platform/auth.js";
@@ -35,6 +37,7 @@ export function buildApp(config: Config, overrides: AppOverrides = {}): FastifyI
   const requireRole = registerAuth(app, overrides.verifier ?? createAuth0Verifier(config));
 
   app.register(healthRoutes);
+  app.register(studioRoutes, { service: new StudioService(db), requireRole });
   app.register(tariffRoutes, { service: new TariffService(db), requireRole });
 
   return app;
