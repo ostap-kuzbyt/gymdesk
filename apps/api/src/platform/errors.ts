@@ -14,6 +14,14 @@ export class ConflictError extends Error {
   override readonly name = "ConflictError";
 }
 
+export class UnauthorizedError extends Error {
+  override readonly name = "UnauthorizedError";
+}
+
+export class ForbiddenError extends Error {
+  override readonly name = "ForbiddenError";
+}
+
 interface ProblemDetails {
   type: "about:blank";
   title: string;
@@ -51,6 +59,8 @@ export function registerErrorHandler(app: FastifyInstance): void {
     if (error instanceof DomainError) return sendProblem(reply, 400, error.message);
     if (error instanceof NotFoundError) return sendProblem(reply, 404, error.message);
     if (error instanceof ConflictError) return sendProblem(reply, 409, error.message);
+    if (error instanceof UnauthorizedError) return sendProblem(reply, 401, error.message);
+    if (error instanceof ForbiddenError) return sendProblem(reply, 403, error.message);
 
     if (hasZodFastifySchemaValidationErrors(error)) {
       const errors = error.validation.map((issue) => ({

@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app.js";
-import { loadConfig } from "./config.js";
+import { testConfig } from "../testing/test-config.js";
 
-const app = buildApp(loadConfig({ NODE_ENV: "test", DATABASE_URL: "postgres://localhost/test" }));
+const app = buildApp(testConfig());
 
 afterEach(async () => {
   await app.close();

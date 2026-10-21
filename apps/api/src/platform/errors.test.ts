@@ -3,13 +3,13 @@ import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { z } from "zod";
 import { buildApp } from "../app.js";
-import { loadConfig } from "./config.js";
+import { testConfig } from "../testing/test-config.js";
 import { ConflictError, DomainError, NotFoundError } from "./errors.js";
 
 let app: FastifyInstance;
 
 beforeEach(() => {
-  app = buildApp(loadConfig({ NODE_ENV: "test", DATABASE_URL: "postgres://localhost/test" }));
+  app = buildApp(testConfig());
   app.get("/domain", async () => {
     throw new DomainError("Subscription has already expired");
   });
