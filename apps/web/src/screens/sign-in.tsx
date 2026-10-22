@@ -1,4 +1,4 @@
-import { BarbellHero } from "@/components/barbell-hero";
+import { LifterHero } from "@/components/lifter-hero";
 import { PlateMark } from "@/components/plate-mark";
 import { Button } from "@/components/ui/button";
 
@@ -20,7 +20,7 @@ export function SignIn({ onSignIn }: { onSignIn: () => void }) {
         </Button>
       </div>
       <div className="h-80 sm:h-[26rem] lg:h-[34rem]">
-        <BarbellHero />
+        <LifterHero />
       </div>
     </main>
   );

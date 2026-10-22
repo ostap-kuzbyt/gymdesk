@@ -104,10 +104,10 @@ describe("greeting", () => {
     ).toBeInTheDocument();
   });
 
-  it("describes the picture of the barbell for assistive technology", async () => {
+  it("describes the lifter picture for assistive technology", async () => {
     await openToday(todayApi());
 
-    expect(await screen.findByRole("img", { name: /barbell/i })).toBeInTheDocument();
+    expect(await screen.findByRole("img", { name: /bench press/i })).toBeInTheDocument();
   });
 });
 
@@ -156,6 +156,31 @@ describe("workouts today", () => {
 
     expect(await screen.findByText("The database is restarting")).toBeInTheDocument();
     expect(await screen.findByText("Olena Shevchenko")).toBeInTheDocument();
+  });
+});
+
+describe("studios today", () => {
+  it("shows how full each studio is, adding up its workouts", async () => {
+    const api = todayApi({
+      workouts: [
+        workout(1, { reserved: 5, capacity: 10 }),
+        workout(2, { reserved: 5, capacity: 10 }),
+      ],
+    });
+    await openToday(api);
+
+    const list = await screen.findByRole("heading", { name: "Studios today" });
+    const studio = within(list.closest("section") as HTMLElement).getByRole("link", {
+      name: /Main hall/,
+    });
+    expect(studio).toHaveTextContent("10 of 20 places booked");
+    expect(studio).toHaveAttribute("href", expect.stringContaining(`studio=${MAIN}`));
+  });
+
+  it("says when a studio has no workouts today", async () => {
+    await openToday(todayApi());
+
+    expect(await screen.findByText("No workouts today")).toBeInTheDocument();
   });
 });
 

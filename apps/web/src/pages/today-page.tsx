@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useSession } from "@/auth/session";
-import { BarbellHero } from "@/components/barbell-hero";
+import { LifterHero } from "@/components/lifter-hero";
 import { Panel } from "@/components/panel";
 import { EmptyState, ErrorNotice, TableSkeleton } from "@/components/query-states";
 import { StatBlock } from "@/components/stat-block";
@@ -11,6 +11,7 @@ import { ActiveUntil } from "@/features/members/subscription-plate";
 import { useReminders } from "@/features/reminders/api";
 import { useAttendance, useRevenue } from "@/features/reports/api";
 import { useStudios } from "@/features/studios/api";
+import { StudioMap } from "@/features/studios/studio-map";
 import { useWorkouts } from "@/features/workouts/api";
 import { fillOf } from "@/features/workouts/capacity";
 import { useCurrency } from "@/lib/config-context";
@@ -67,8 +68,8 @@ export function TodayPage() {
             </Button>
           ) : null}
         </div>
-        <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 sm:block">
-          <BarbellHero distance={7.2} />
+        <div className="absolute inset-y-0 right-0 hidden w-1/2 sm:block">
+          <LifterHero />
         </div>
       </header>
 
@@ -122,6 +123,8 @@ export function TodayPage() {
           />
         ) : null}
       </div>
+
+      <StudioMap />
 
       <div className="grid gap-10 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <TodaysWorkouts today={today} />
