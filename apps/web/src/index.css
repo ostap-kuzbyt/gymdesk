@@ -27,8 +27,8 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-rubber: var(--rubber);
-  --color-chalk: var(--chalk);
+  --color-teal: var(--teal);
+  --color-orange: var(--orange);
 
   --color-plate-green: var(--plate-green);
   --color-plate-green-foreground: var(--plate-green-foreground);
@@ -59,76 +59,89 @@
 }
 
 :root {
-  --radius: 0.25rem;
+  --radius: 0.75rem;
 
-  --background: #dfe2e4;
-  --foreground: #14181b;
-  --card: #fbfbfa;
-  --card-foreground: #14181b;
-  --popover: #fbfbfa;
-  --popover-foreground: #14181b;
-  --primary: #14181b;
-  --primary-foreground: #fbfbfa;
-  --secondary: #d5d9dd;
-  --secondary-foreground: #1d2327;
-  --muted: #d3d7da;
-  --muted-foreground: #4f5a61;
-  --accent: #e3e6e8;
-  --accent-foreground: #14181b;
-  --destructive: #c9302b;
-  --border: #b4bbc0;
-  --input: #a7afb5;
-  --rubber: #101417;
-  --chalk: #f1f0eb;
-  --ring: #1f5fbf;
+  --background: #e8f1fb;
+  --foreground: #0e1b33;
+  --card: #ffffff;
+  --card-foreground: #0e1b33;
+  --popover: #ffffff;
+  --popover-foreground: #0e1b33;
+  --primary: #1a5fe8;
+  --primary-foreground: #ffffff;
+  --secondary: #e2ecf8;
+  --secondary-foreground: #0e1b33;
+  --muted: #e4edf8;
+  --muted-foreground: #546580;
+  --accent: #e1ecff;
+  --accent-foreground: #0b3aa0;
+  --destructive: #d63b3b;
+  --border: #d2dff0;
+  --input: #bccde4;
+  --ring: #1a5fe8;
 
-  --plate-green: #1b7f42;
+  --teal: #12b89a;
+  --orange: #ff8a4c;
+
+  --page-gradient: linear-gradient(160deg, #e1eefc 0%, #e8f7f2 52%, #fff2e8 100%);
+  --surface-shadow: 0 1px 2px rgb(14 27 51 / 0.05), 0 14px 34px -18px rgb(26 95 232 / 0.28);
+
+  --plate-green: #0b8a62;
   --plate-green-foreground: #ffffff;
-  --plate-green-soft: #d3ebdc;
-  --plate-blue: #1f5fbf;
+  --plate-green-soft: #d6f3e9;
+  --plate-blue: #1a5fe8;
   --plate-blue-foreground: #ffffff;
-  --plate-blue-soft: #d3e0f4;
-  --plate-yellow: #e8b50e;
-  --plate-yellow-foreground: #1d2327;
-  --plate-yellow-soft: #f6e8b8;
-  --plate-red: #c9302b;
+  --plate-blue-soft: #dbe7ff;
+  --plate-yellow: #f5b800;
+  --plate-yellow-foreground: #1a1400;
+  --plate-yellow-soft: #fff1c4;
+  --plate-red: #d63b3b;
   --plate-red-foreground: #ffffff;
-  --plate-red-soft: #f3d4d2;
+  --plate-red-soft: #fde0e0;
 }
 
 .dark {
-  --background: #0d1114;
-  --foreground: #e7eaec;
-  --card: #171d21;
-  --card-foreground: #e7eaec;
-  --popover: #1b2227;
-  --popover-foreground: #e7eaec;
-  --primary: #f2c230;
-  --primary-foreground: #1a1400;
-  --secondary: #242c32;
-  --secondary-foreground: #e7eaec;
-  --muted: #1f262b;
-  --muted-foreground: #9aa4ab;
-  --accent: #232b31;
-  --accent-foreground: #e7eaec;
-  --destructive: #ef6a63;
-  --border: #2f383e;
-  --rubber: #080b0d;
-  --input: #38424a;
-  --ring: #5b93e8;
+  --background: #0a1124;
+  --foreground: #e8eefb;
+  --card: #111a30;
+  --card-foreground: #e8eefb;
+  --popover: #14203a;
+  --popover-foreground: #e8eefb;
+  --primary: #5b93ff;
+  --primary-foreground: #06122b;
+  --secondary: #1a2644;
+  --secondary-foreground: #e8eefb;
+  --muted: #16213c;
+  --muted-foreground: #94a6c6;
+  --accent: #1b2a4d;
+  --accent-foreground: #cfe0ff;
+  --destructive: #ff6b6b;
+  --border: #243456;
+  --input: #2d4066;
+  --ring: #5b93ff;
 
-  --plate-green: #3dba6b;
-  --plate-green-foreground: #07140c;
-  --plate-green-soft: #16301f;
-  --plate-blue: #5b93e8;
-  --plate-blue-foreground: #0b1220;
-  --plate-blue-soft: #1a2a44;
-  --plate-yellow: #f2c230;
+  --page-gradient: linear-gradient(160deg, #080e20 0%, #0c1830 55%, #110f2a 100%);
+  --surface-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 16px 36px -18px rgb(0 0 0 / 0.6);
+
+  --plate-green: #34d3a0;
+  --plate-green-foreground: #04140e;
+  --plate-green-soft: #0f3328;
+  --plate-blue: #5b93ff;
+  --plate-blue-foreground: #06122b;
+  --plate-blue-soft: #16295a;
+  --plate-yellow: #ffc933;
   --plate-yellow-foreground: #1a1400;
-  --plate-yellow-soft: #3a3012;
-  --plate-red: #ef6a63;
-  --plate-red-foreground: #1a0605;
-  --plate-red-soft: #3d1a18;
+  --plate-yellow-soft: #3a3010;
+  --plate-red: #ff7070;
+  --plate-red-foreground: #1a0505;
+  --plate-red-soft: #3d1a1a;
+}
+
+@utility surface {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--surface-shadow);
 }
 
 @utility font-stamp {
@@ -154,6 +167,8 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    background-image: var(--page-gradient);
+    background-attachment: fixed;
     font-size: 0.9375rem;
     line-height: 1.5;
   }

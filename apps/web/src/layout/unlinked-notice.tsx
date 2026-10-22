@@ -18,7 +18,7 @@ export function UnlinkedNotice({ subject }: { subject: string }) {
   return (
     <section
       role="status"
-      className="mb-6 flex flex-col gap-4 rounded-md border border-l-8 border-border border-l-plate-yellow bg-card px-5 py-4"
+      className="surface mb-6 flex flex-col gap-4 border-l-8 border-l-plate-yellow px-5 py-4"
     >
       <div className="flex flex-col gap-1">
         <h2>Your account is not linked to a coach profile</h2>

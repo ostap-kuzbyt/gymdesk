@@ -19,9 +19,9 @@ import { ROLE_LABELS, navFor } from "@/nav";
 import { usePalette } from "@/palette/palette-context";
 
 const tabClass =
-  "relative flex h-14 items-center px-3 text-sm font-medium whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:-outline-offset-2";
+  "relative flex h-9 items-center rounded-full px-3.5 text-sm font-medium whitespace-nowrap text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:-outline-offset-2";
 const activeTabClass =
-  "text-foreground after:absolute after:inset-x-3 after:bottom-0 after:h-[3px] after:bg-plate-yellow";
+  "bg-primary text-primary-foreground shadow-md shadow-primary/25 hover:bg-primary hover:text-primary-foreground";
 
 function initialsOf(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -40,7 +40,7 @@ function UserMenu() {
         <Button variant="ghost" className="gap-2 px-2" aria-label="Account menu">
           <span
             aria-hidden
-            className="grid size-6 place-items-center rounded-full bg-plate-yellow text-xs font-semibold text-plate-yellow-foreground"
+            className="grid size-7 place-items-center rounded-full bg-gradient-to-br from-primary to-teal text-xs font-semibold text-primary-foreground"
           >
             {initialsOf(name)}
           </span>
@@ -159,13 +159,13 @@ export function TopBar() {
   const { roles } = useSession();
 
   return (
-    <header className="dark sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-white/10 bg-rubber px-3 text-foreground sm:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b border-border bg-card/80 px-3 backdrop-blur-md sm:px-6">
       <MobileNav />
       <Link to="/" className="mr-5 flex items-center gap-2 font-stamp text-xl">
         <PlateMark />
         Gymdesk
       </Link>
-      <nav aria-label="Pages" className="hidden h-full md:flex">
+      <nav aria-label="Pages" className="hidden items-center gap-1 md:flex">
         {navFor(roles, "main").map((item) => (
           <Link
             key={item.id}

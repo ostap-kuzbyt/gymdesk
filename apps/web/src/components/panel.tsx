@@ -8,7 +8,7 @@ interface PanelProps {
 
 export function Panel({ title, action, children }: PanelProps) {
   return (
-    <section className="rounded-md border border-border bg-card">
+    <section className="surface">
       <div className="flex items-baseline justify-between gap-3 border-b border-border px-4 py-3">
         <h2>{title}</h2>
         {action}
