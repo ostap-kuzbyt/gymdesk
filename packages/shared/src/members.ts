@@ -34,6 +34,26 @@ export const subscriptionPurchase = z.object({
   startsOn: isoDate.optional(),
 });
 
+export const checkInView = z.object({
+  id,
+  memberId: id,
+  subscriptionId: id,
+  visitDate: isoDate,
+  checkedInAt: z.iso.datetime(),
+});
+
+export const visitItem = checkInView.omit({ memberId: true });
+
+export const visitHistoryQuery = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(25),
+  offset: z.coerce.number().int().min(0).default(0),
+});
+
+export const visitPage = z.object({
+  items: z.array(visitItem),
+  total: z.number().int().min(0),
+});
+
 export const memberView = memberFields.extend({
   id,
   age: z.number().int(),
@@ -64,6 +84,8 @@ export const memberPage = z.object({
 export type NewMemberInput = z.infer<typeof newMember>;
 export type MemberChangesInput = z.infer<typeof memberChanges>;
 export type SubscriptionPurchaseInput = z.infer<typeof subscriptionPurchase>;
+export type CheckInView = z.infer<typeof checkInView>;
+export type VisitPage = z.infer<typeof visitPage>;
 export type SubscriptionView = z.infer<typeof subscriptionView>;
 export type MemberView = z.infer<typeof memberView>;
 export type MemberListItem = z.infer<typeof memberListItem>;

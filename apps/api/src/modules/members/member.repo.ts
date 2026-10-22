@@ -1,7 +1,8 @@
-import { and, asc, count, eq, gte, ilike, inArray, isNull, lte, or, sql } from "drizzle-orm";
-import { members, subscriptions } from "../../platform/db/schema.js";
+import { and, asc, count, desc, eq, gte, ilike, inArray, isNull, lte, or, sql } from "drizzle-orm";
+import { checkIns, members, subscriptions } from "../../platform/db/schema.js";
 import type { Executor } from "../../platform/db/tx.js";
 import { ConflictError } from "../../platform/errors.js";
+import type { CheckIn, VisitUsage } from "./check-in.js";
 import { Member } from "./member.js";
 import type { Subscription } from "./subscription.js";
 
@@ -14,6 +15,13 @@ export interface MemberListRow {
   email: string;
   phone: string | null;
   activeUntil: string | null;
+}
+
+export interface VisitRow {
+  id: string;
+  subscriptionId: string;
+  visitDate: string;
+  checkedInAt: Date;
 }
 
 export interface MemberSearch {
@@ -144,5 +152,60 @@ export const memberRepo = {
       rows: page.map((row) => ({ ...row, activeUntil: activeUntil.get(row.id) ?? null })),
       total: totals?.total ?? 0,
     };
+  },
+
+  async exists(db: Executor, id: string): Promise<boolean> {
+    const [row] = await db.select({ id: members.id }).from(members).where(eq(members.id, id));
+    return row !== undefined;
+  },
+
+  async visitUsage(db: Executor, memberId: string, date: string): Promise<VisitUsage> {
+    const perSubscription = await db
+      .select({ subscriptionId: checkIns.subscriptionId, visits: count() })
+      .from(checkIns)
+      .where(eq(checkIns.memberId, memberId))
+      .groupBy(checkIns.subscriptionId);
+
+    const [today] = await db
+      .select({ id: checkIns.id })
+      .from(checkIns)
+      .where(and(eq(checkIns.memberId, memberId), eq(checkIns.visitDate, date)));
+
+    return {
+      alreadyCheckedIn: today !== undefined,
+      visitsBySubscription: Object.fromEntries(
+        perSubscription.map((row) => [row.subscriptionId, row.visits]),
+      ),
+    };
+  },
+
+  async insertCheckIn(db: Executor, checkIn: CheckIn, checkedInAt: Date): Promise<void> {
+    await db.insert(checkIns).values({ ...checkIn, checkedInAt });
+  },
+
+  async visits(
+    db: Executor,
+    memberId: string,
+    page: { limit: number; offset: number },
+  ): Promise<{ rows: VisitRow[]; total: number }> {
+    const rows = await db
+      .select({
+        id: checkIns.id,
+        subscriptionId: checkIns.subscriptionId,
+        visitDate: checkIns.visitDate,
+        checkedInAt: checkIns.checkedInAt,
+      })
+      .from(checkIns)
+      .where(eq(checkIns.memberId, memberId))
+      .orderBy(desc(checkIns.visitDate), desc(checkIns.checkedInAt))
+      .limit(page.limit)
+      .offset(page.offset);
+
+    const [totals] = await db
+      .select({ total: count() })
+      .from(checkIns)
+      .where(eq(checkIns.memberId, memberId));
+
+    return { rows, total: totals?.total ?? 0 };
   },
 };

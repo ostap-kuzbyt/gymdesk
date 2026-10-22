@@ -1,4 +1,5 @@
 import {
+  checkInView,
   id,
   memberChanges,
   memberPage,
@@ -7,6 +8,8 @@ import {
   newMember,
   subscriptionPurchase,
   subscriptionView,
+  visitHistoryQuery,
+  visitPage,
 } from "@gymdesk/shared";
 import type { FastifyPluginAsync } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
@@ -86,5 +89,23 @@ export const memberRoutes: FastifyPluginAsync<MemberRoutesOptions> = async (
       schema: { params: subscriptionParams, response: { 200: memberView } },
     },
     async (request) => service.cancelSubscription(request.params.id, request.params.subscriptionId),
+  );
+
+  api.post(
+    "/api/members/:id/check-ins",
+    {
+      preHandler: frontDesk,
+      schema: { params: idParams, response: { 201: checkInView } },
+    },
+    async (request, reply) => reply.code(201).send(await service.checkIn(request.params.id)),
+  );
+
+  api.get(
+    "/api/members/:id/check-ins",
+    {
+      preHandler: anyStaff,
+      schema: { params: idParams, querystring: visitHistoryQuery, response: { 200: visitPage } },
+    },
+    async (request) => service.visits(request.params.id, request.query),
   );
 };

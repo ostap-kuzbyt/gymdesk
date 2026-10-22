@@ -3,6 +3,7 @@ import type { Db } from "../../platform/db/client.js";
 import { withTx } from "../../platform/db/tx.js";
 import { ConflictError, DomainError, NotFoundError } from "../../platform/errors.js";
 import type { TariffService } from "../tariffs/tariff.service.js";
+import type { CheckIn } from "./check-in.js";
 import { Member, ageOn } from "./member.js";
 import type { MemberChanges, MemberSnapshot, NewMember } from "./member.js";
 import { memberRepo } from "./member.repo.js";
@@ -25,6 +26,22 @@ export interface MemberListItem {
 
 export interface MemberPage {
   items: MemberListItem[];
+  total: number;
+}
+
+export interface CheckInDetails extends CheckIn {
+  checkedInAt: string;
+}
+
+export interface VisitItem {
+  id: string;
+  subscriptionId: string;
+  visitDate: string;
+  checkedInAt: string;
+}
+
+export interface VisitPage {
+  items: VisitItem[];
   total: number;
 }
 
@@ -78,6 +95,32 @@ export class MemberService {
     return this.modify(memberId, (member, today) => {
       member.cancelSubscription(subscriptionId, today);
     });
+  }
+
+  checkIn(memberId: string): Promise<CheckInDetails> {
+    const today = this.clock.today();
+    const checkedInAt = this.clock.now();
+    return withTx(this.db, async (tx) => {
+      const member = await memberRepo.findById(tx, memberId);
+      if (!member) throw new NotFoundError("Member was not found");
+
+      const usage = await memberRepo.visitUsage(tx, memberId, today);
+      const visit = member.checkIn(today, usage);
+      await memberRepo.insertCheckIn(tx, visit, checkedInAt);
+
+      return { ...visit, checkedInAt: checkedInAt.toISOString() };
+    });
+  }
+
+  async visits(memberId: string, page: { limit: number; offset: number }): Promise<VisitPage> {
+    if (!(await memberRepo.exists(this.db, memberId))) {
+      throw new NotFoundError("Member was not found");
+    }
+    const { rows, total } = await memberRepo.visits(this.db, memberId, page);
+    return {
+      items: rows.map((row) => ({ ...row, checkedInAt: row.checkedInAt.toISOString() })),
+      total,
+    };
   }
 
   async search(options: {
