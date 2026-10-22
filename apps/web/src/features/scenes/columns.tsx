@@ -18,11 +18,15 @@ function labelTexture(text: string): THREE.CanvasTexture {
   canvas.height = 96;
   const context = canvas.getContext("2d");
   if (context) {
+    context.fillStyle = "rgba(255,255,255,0.9)";
+    context.beginPath();
+    context.roundRect(16, 12, 224, 72, 36);
+    context.fill();
     context.fillStyle = "#0e1b33";
     context.font = "700 40px Archivo, system-ui, sans-serif";
     context.textAlign = "center";
     context.textBaseline = "middle";
-    context.fillText(text, 128, 48, 240);
+    context.fillText(text, 128, 49, 200);
   }
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
