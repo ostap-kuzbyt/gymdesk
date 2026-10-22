@@ -16,6 +16,8 @@ import {
 import { ActiveUntil } from "@/features/members/subscription-plate";
 import { useAttendance, useLoad, useRevenue } from "@/features/reports/api";
 import { CoachHoursChart, RevenueChart, StudioBookingsChart } from "@/features/reports/charts";
+import { ChartViewToggle, useChartView } from "@/features/reports/chart-view";
+import { Columns3D } from "@/features/reports/columns-3d";
 import {
   DEFAULT_PRESET,
   fillPercent,
@@ -300,6 +302,7 @@ function RevenuePanel({
 }) {
   const currency = useCurrency();
   const report = useRevenue({ ...range, granularity, enabled: true });
+  const [view, setView, canShow3d] = useChartView();
 
   if (report.isPending) return <TableSkeleton columns={3} />;
   if (report.isError)
@@ -316,26 +319,40 @@ function RevenuePanel({
             from {totalSubscriptions} {totalSubscriptions === 1 ? "subscription" : "subscriptions"}
           </span>
         </p>
-        <div role="group" aria-label="Group by" className="flex gap-2">
-          {(["month", "year"] as const).map((option) => (
-            <Button
-              key={option}
-              size="sm"
-              variant={granularity === option ? "secondary" : "outline"}
-              aria-pressed={granularity === option}
-              onClick={() => onGranularity(option)}
-            >
-              {option === "month" ? "By month" : "By year"}
-            </Button>
-          ))}
+        <div className="flex flex-wrap items-center gap-4">
+          {canShow3d ? <ChartViewToggle view={view} onChange={setView} /> : null}
+          <div role="group" aria-label="Group by" className="flex gap-2">
+            {(["month", "year"] as const).map((option) => (
+              <Button
+                key={option}
+                size="sm"
+                variant={granularity === option ? "secondary" : "outline"}
+                aria-pressed={granularity === option}
+                onClick={() => onGranularity(option)}
+              >
+                {option === "month" ? "By month" : "By year"}
+              </Button>
+            ))}
+          </div>
         </div>
       </div>
 
-      <RevenueChart
-        rows={rows}
-        currency={currency}
-        label={`Revenue by ${granularity} from ${formatDate(range.from)} to ${formatDate(range.to)}`}
-      />
+      {view === "3d" ? (
+        <Columns3D
+          label={`Revenue by ${granularity} from ${formatDate(range.from)} to ${formatDate(range.to)}`}
+          columns={rows.map((row) => ({
+            label: periodLabel(row.period),
+            value: row.revenueCents / 100,
+            caption: `${periodLabel(row.period)}: ${formatMoney(row.revenueCents, currency)} from ${row.subscriptions} ${row.subscriptions === 1 ? "subscription" : "subscriptions"}`,
+          }))}
+        />
+      ) : (
+        <RevenueChart
+          rows={rows}
+          currency={currency}
+          label={`Revenue by ${granularity} from ${formatDate(range.from)} to ${formatDate(range.to)}`}
+        />
+      )}
 
       <Table>
         <TableHeader>
@@ -378,6 +395,7 @@ function LoadPanel({ range }: { range: DateRange }) {
 
 function LoadReport({ range }: { range: DateRange }) {
   const report = useLoad(range);
+  const [view, setView, canShow3d] = useChartView();
 
   if (report.isPending) return <TableSkeleton columns={4} />;
   if (report.isError)
@@ -407,11 +425,27 @@ function LoadReport({ range }: { range: DateRange }) {
         <LoadTable title="Coach" rows={totalsOf(coaches)} />
       </div>
       <div>
-        <h2 className="mb-3">Places booked per day</h2>
-        <StudioBookingsChart
-          points={bookings}
-          label={`Places booked against places offered per day from ${formatDate(range.from)} to ${formatDate(range.to)}`}
-        />
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <h2>Places booked per day</h2>
+          {canShow3d ? <ChartViewToggle view={view} onChange={setView} /> : null}
+        </div>
+        {view === "3d" ? (
+          <Columns3D
+            color="#12b89a"
+            label={`Places booked against places offered per day from ${formatDate(range.from)} to ${formatDate(range.to)}`}
+            columns={bookings.map((point) => ({
+              label: String(Number(point.date.slice(8))),
+              value: point.booked,
+              ghost: point.capacity,
+              caption: `${formatDate(point.date)}: ${point.booked} of ${point.capacity} places booked`,
+            }))}
+          />
+        ) : (
+          <StudioBookingsChart
+            points={bookings}
+            label={`Places booked against places offered per day from ${formatDate(range.from)} to ${formatDate(range.to)}`}
+          />
+        )}
         <LoadTable title="Studio" rows={totalsOf(studios)} />
       </div>
     </div>
