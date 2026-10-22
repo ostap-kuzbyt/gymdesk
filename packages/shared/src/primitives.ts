@@ -11,7 +11,13 @@ export const phone = z
 
 export const moneyCents = z.number().int().nonnegative();
 
-export const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD");
+export function isCalendarDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
+export const isoDate = z.string().refine(isCalendarDate, "Date must be a real date as YYYY-MM-DD");
 
 export const dateRange = z
   .object({ from: isoDate, to: isoDate })
