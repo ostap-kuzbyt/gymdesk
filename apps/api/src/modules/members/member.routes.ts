@@ -5,6 +5,8 @@ import {
   memberSearch,
   memberView,
   newMember,
+  subscriptionPurchase,
+  subscriptionView,
 } from "@gymdesk/shared";
 import type { FastifyPluginAsync } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
@@ -18,6 +20,7 @@ export interface MemberRoutesOptions {
 }
 
 const idParams = z.object({ id });
+const subscriptionParams = z.object({ id, subscriptionId: id });
 
 export const memberRoutes: FastifyPluginAsync<MemberRoutesOptions> = async (
   app,
@@ -55,5 +58,33 @@ export const memberRoutes: FastifyPluginAsync<MemberRoutesOptions> = async (
       const { version, ...changes } = request.body;
       return service.update(request.params.id, version, changes);
     },
+  );
+
+  api.get(
+    "/api/members/:id/subscriptions",
+    {
+      preHandler: anyStaff,
+      schema: { params: idParams, response: { 200: z.array(subscriptionView) } },
+    },
+    async (request) => (await service.get(request.params.id)).subscriptions,
+  );
+
+  api.post(
+    "/api/members/:id/subscriptions",
+    {
+      preHandler: frontDesk,
+      schema: { params: idParams, body: subscriptionPurchase, response: { 201: memberView } },
+    },
+    async (request, reply) =>
+      reply.code(201).send(await service.purchaseSubscription(request.params.id, request.body)),
+  );
+
+  api.post(
+    "/api/members/:id/subscriptions/:subscriptionId/cancel",
+    {
+      preHandler: frontDesk,
+      schema: { params: subscriptionParams, response: { 200: memberView } },
+    },
+    async (request) => service.cancelSubscription(request.params.id, request.params.subscriptionId),
   );
 };

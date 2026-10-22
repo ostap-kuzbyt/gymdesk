@@ -29,6 +29,11 @@ export const subscriptionView = z.object({
   status: subscriptionStatus,
 });
 
+export const subscriptionPurchase = z.object({
+  tariffId: id,
+  startsOn: isoDate.optional(),
+});
+
 export const memberView = memberFields.extend({
   id,
   age: z.number().int(),
@@ -58,6 +63,7 @@ export const memberPage = z.object({
 
 export type NewMemberInput = z.infer<typeof newMember>;
 export type MemberChangesInput = z.infer<typeof memberChanges>;
+export type SubscriptionPurchaseInput = z.infer<typeof subscriptionPurchase>;
 export type SubscriptionView = z.infer<typeof subscriptionView>;
 export type MemberView = z.infer<typeof memberView>;
 export type MemberListItem = z.infer<typeof memberListItem>;

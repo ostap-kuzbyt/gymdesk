@@ -42,10 +42,15 @@ export function buildApp(config: Config, overrides: AppOverrides = {}): FastifyI
   const clock = overrides.clock ?? createClock(config.CLUB_TIMEZONE);
   const requireRole = registerAuth(app, overrides.verifier ?? createAuth0Verifier(config));
 
+  const tariffService = new TariffService(db);
+
   app.register(healthRoutes);
-  app.register(memberRoutes, { service: new MemberService(db, clock), requireRole });
+  app.register(memberRoutes, {
+    service: new MemberService(db, clock, tariffService),
+    requireRole,
+  });
   app.register(studioRoutes, { service: new StudioService(db), requireRole });
-  app.register(tariffRoutes, { service: new TariffService(db), requireRole });
+  app.register(tariffRoutes, { service: tariffService, requireRole });
 
   return app;
 }

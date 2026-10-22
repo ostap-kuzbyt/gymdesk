@@ -1,7 +1,8 @@
 import type { Clock } from "../../platform/clock.js";
 import type { Db } from "../../platform/db/client.js";
 import { withTx } from "../../platform/db/tx.js";
-import { ConflictError, NotFoundError } from "../../platform/errors.js";
+import { ConflictError, DomainError, NotFoundError } from "../../platform/errors.js";
+import type { TariffService } from "../tariffs/tariff.service.js";
 import { Member, ageOn } from "./member.js";
 import type { MemberChanges, MemberSnapshot, NewMember } from "./member.js";
 import { memberRepo } from "./member.repo.js";
@@ -31,6 +32,7 @@ export class MemberService {
   constructor(
     private readonly db: Db,
     private readonly clock: Clock,
+    private readonly tariffs: TariffService,
   ) {}
 
   register(input: NewMember): Promise<MemberDetails> {
@@ -54,6 +56,27 @@ export class MemberService {
         throw new ConflictError("The member was changed by someone else, reload and try again");
       }
       member.updateProfile(changes, today);
+    });
+  }
+
+  async purchaseSubscription(
+    memberId: string,
+    request: { tariffId: string; startsOn?: string | undefined },
+  ): Promise<MemberDetails> {
+    const startsOn = request.startsOn ?? this.clock.today();
+    if (startsOn < this.clock.today()) {
+      throw new DomainError("A subscription cannot start in the past");
+    }
+
+    const offer = await this.tariffs.quote(request.tariffId, startsOn);
+    return this.modify(memberId, (member) => {
+      member.purchase(offer);
+    });
+  }
+
+  cancelSubscription(memberId: string, subscriptionId: string): Promise<MemberDetails> {
+    return this.modify(memberId, (member, today) => {
+      member.cancelSubscription(subscriptionId, today);
     });
   }
 

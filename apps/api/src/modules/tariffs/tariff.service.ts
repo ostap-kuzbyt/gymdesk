@@ -1,9 +1,17 @@
 import type { Db } from "../../platform/db/client.js";
 import { withTx } from "../../platform/db/tx.js";
-import { ConflictError, NotFoundError } from "../../platform/errors.js";
+import { ConflictError, DomainError, NotFoundError } from "../../platform/errors.js";
 import { Tariff } from "./tariff.js";
 import type { NewTariff, TariffChanges, TariffSnapshot } from "./tariff.js";
 import { tariffRepo } from "./tariff.repo.js";
+
+export interface TariffQuote {
+  tariffId: string;
+  startsOn: string;
+  endsOn: string;
+  priceCents: number;
+  visitLimit: number | null;
+}
 
 export class TariffService {
   constructor(private readonly db: Db) {}
@@ -17,6 +25,15 @@ export class TariffService {
     const tariff = await tariffRepo.findById(this.db, id);
     if (!tariff) throw new NotFoundError("Tariff was not found");
     return tariff.toSnapshot();
+  }
+
+  async quote(id: string, startsOn: string): Promise<TariffQuote> {
+    const tariff = await tariffRepo.findById(this.db, id);
+    if (!tariff) throw new NotFoundError("Tariff was not found");
+    if (tariff.archived) throw new DomainError("An archived tariff can no longer be sold");
+
+    const { priceCents, visitLimit } = tariff.toSnapshot();
+    return { tariffId: id, startsOn, endsOn: tariff.endDateFor(startsOn), priceCents, visitLimit };
   }
 
   create(input: NewTariff): Promise<TariffSnapshot> {
