@@ -88,10 +88,16 @@ function Rig({ still }: { still: boolean }) {
   );
 }
 
-export default function BarbellScene({ still }: { still: boolean }) {
+export default function BarbellScene({
+  still,
+  distance = 9.4,
+}: {
+  still: boolean;
+  distance?: number;
+}) {
   return (
     <Canvas
-      camera={{ position: [0, 0.4, 9.4], fov: 32 }}
+      camera={{ position: [0, 0.4, distance], fov: 32 }}
       dpr={[1, 2]}
       gl={{ antialias: true, alpha: true }}
     >

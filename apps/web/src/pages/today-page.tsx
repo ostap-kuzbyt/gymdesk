@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useSession } from "@/auth/session";
-import { PageHeader } from "@/components/page-header";
+import { BarbellHero } from "@/components/barbell-hero";
 import { Panel } from "@/components/panel";
 import { EmptyState, ErrorNotice, TableSkeleton } from "@/components/query-states";
 import { StatBlock } from "@/components/stat-block";
@@ -20,6 +20,12 @@ import { isAdmin, isFrontDesk } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 
 const EXPIRY_WINDOW_DAYS = 7;
+
+function greetingFor(hour: number): string {
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+}
 const FILL_DOT = {
   green: "bg-plate-green",
   yellow: "bg-plate-yellow",
@@ -29,7 +35,8 @@ const FILL_DOT = {
 } as const;
 
 export function TodayPage() {
-  const { roles } = useSession();
+  const { roles, user } = useSession();
+  const firstName = user?.name.split(/\s+/)[0] ?? "there";
   const frontDesk = isFrontDesk(roles);
   const admin = isAdmin(roles);
   const currency = useCurrency();
@@ -47,17 +54,23 @@ export function TodayPage() {
 
   return (
     <section className="flex flex-col gap-6">
-      <PageHeader
-        title="Today"
-        description={`${WEEKDAY_LONG[weekdayOf(today) - 1]}, ${formatDate(today)}`}
-        actions={
-          frontDesk ? (
-            <Button asChild>
+      <header className="surface relative flex min-h-72 items-center overflow-hidden bg-gradient-to-br from-card via-plate-blue-soft to-plate-green-soft">
+        <div className="relative z-10 flex flex-col items-start gap-3 px-6 py-8 sm:max-w-[55%] sm:py-10">
+          <p className="text-lg font-medium text-muted-foreground">
+            {greetingFor(new Date().getHours())}, {firstName}
+          </p>
+          <h1 className="text-6xl">Today</h1>
+          <p className="text-muted-foreground">{`${WEEKDAY_LONG[weekdayOf(today) - 1]}, ${formatDate(today)}`}</p>
+          {frontDesk ? (
+            <Button asChild size="lg" className="mt-2 h-11 px-6 text-base">
               <Link to="/check-in">Open check-in</Link>
             </Button>
-          ) : undefined
-        }
-      />
+          ) : null}
+        </div>
+        <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 sm:block">
+          <BarbellHero distance={7.2} />
+        </div>
+      </header>
 
       {frontDesk && failedCount > 0 ? (
         <div

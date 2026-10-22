@@ -95,6 +95,22 @@ async function openToday(api: ReturnType<typeof mockApi>, options: RenderOptions
   return { user, ...view };
 }
 
+describe("greeting", () => {
+  it("welcomes the signed-in person by their first name", async () => {
+    await openToday(todayApi(), { name: "Iryna Frontdesk" });
+
+    expect(
+      await screen.findByText(/^Good (morning|afternoon|evening), Iryna$/),
+    ).toBeInTheDocument();
+  });
+
+  it("describes the picture of the barbell for assistive technology", async () => {
+    await openToday(todayApi());
+
+    expect(await screen.findByRole("img", { name: /barbell/i })).toBeInTheDocument();
+  });
+});
+
 describe("workouts today", () => {
   it("lists today's workouts in time order with studio, coach and places", async () => {
     const api = todayApi({

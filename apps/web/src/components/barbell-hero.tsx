@@ -44,7 +44,7 @@ function StaticPlate() {
   );
 }
 
-export function BarbellHero({ className }: { className?: string }) {
+export function BarbellHero({ className, distance }: { className?: string; distance?: number }) {
   const fallback = <StaticPlate />;
 
   return (
@@ -56,7 +56,10 @@ export function BarbellHero({ className }: { className?: string }) {
       {supportsWebGl() ? (
         <SceneBoundary fallback={fallback}>
           <Suspense fallback={fallback}>
-            <BarbellScene still={prefersReducedMotion()} />
+            <BarbellScene
+              still={prefersReducedMotion()}
+              {...(distance === undefined ? {} : { distance })}
+            />
           </Suspense>
         </SceneBoundary>
       ) : (
