@@ -12,7 +12,12 @@ describe("loadConfig", () => {
   it("applies defaults for optional values", () => {
     const config = loadConfig(required);
 
-    expect(config).toMatchObject({ NODE_ENV: "development", PORT: 3000, LOG_LEVEL: "info" });
+    expect(config).toMatchObject({
+      NODE_ENV: "development",
+      PORT: 3000,
+      LOG_LEVEL: "info",
+      CLUB_TIMEZONE: "Europe/Kyiv",
+    });
   });
 
   it.each(Object.keys(required))("requires %s", (key) => {
@@ -20,6 +25,12 @@ describe("loadConfig", () => {
     delete env[key];
 
     expect(() => loadConfig(env)).toThrow(new RegExp(key));
+  });
+
+  it("rejects an unknown time zone", () => {
+    expect(() => loadConfig({ ...required, CLUB_TIMEZONE: "Mars/Olympus" })).toThrow(
+      /CLUB_TIMEZONE/,
+    );
   });
 
   it("rejects an out-of-range port", () => {

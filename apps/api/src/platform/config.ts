@@ -7,6 +7,17 @@ const configSchema = z.object({
   AUTH0_DOMAIN: z.string().min(1),
   AUTH0_AUDIENCE: z.string().min(1),
   AUTH0_ROLES_CLAIM: z.string().min(1),
+  CLUB_TIMEZONE: z
+    .string()
+    .default("Europe/Kyiv")
+    .refine((zone) => {
+      try {
+        new Intl.DateTimeFormat("en-CA", { timeZone: zone });
+        return true;
+      } catch {
+        return false;
+      }
+    }, "Must be a valid IANA time zone"),
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
 });
