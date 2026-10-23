@@ -2,6 +2,7 @@ import type { Clock } from "../../platform/clock.js";
 import type { Db } from "../../platform/db/client.js";
 import { withTx } from "../../platform/db/tx.js";
 import { ConflictError, DomainError, NotFoundError } from "../../platform/errors.js";
+import type { CoachService } from "../coaches/coach.service.js";
 import type { TariffService } from "../tariffs/tariff.service.js";
 import type { CheckIn } from "./check-in.js";
 import { Member, ageOn } from "./member.js";
@@ -45,11 +46,18 @@ export interface VisitPage {
   total: number;
 }
 
+export interface PageQuery {
+  q?: string | undefined;
+  limit: number;
+  offset: number;
+}
+
 export class MemberService {
   constructor(
     private readonly db: Db,
     private readonly clock: Clock,
     private readonly tariffs: TariffService,
+    private readonly coaches: CoachService,
   ) {}
 
   register(input: NewMember): Promise<MemberDetails> {
@@ -97,6 +105,16 @@ export class MemberService {
     });
   }
 
+  async assignCoach(memberId: string, coachId: string | null): Promise<MemberDetails> {
+    if (coachId !== null) await this.coaches.requireActive(coachId);
+    return this.modify(memberId, (member) => member.assignCoach(coachId));
+  }
+
+  async membersOfCoach(coachId: string, page: PageQuery): Promise<MemberPage> {
+    await this.coaches.get(coachId);
+    return this.search({ ...page, coachId });
+  }
+
   checkIn(memberId: string): Promise<CheckInDetails> {
     const today = this.clock.today();
     const checkedInAt = this.clock.now();
@@ -123,14 +141,11 @@ export class MemberService {
     };
   }
 
-  async search(options: {
-    q?: string | undefined;
-    limit: number;
-    offset: number;
-  }): Promise<MemberPage> {
+  async search(options: PageQuery & { coachId?: string | undefined }): Promise<MemberPage> {
     const today = this.clock.today();
     const { rows, total } = await memberRepo.search(this.db, {
       q: options.q,
+      coachId: options.coachId,
       limit: options.limit,
       offset: options.offset,
       today,

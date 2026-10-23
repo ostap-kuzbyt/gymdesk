@@ -26,6 +26,7 @@ export interface VisitRow {
 
 export interface MemberSearch {
   q: string | undefined;
+  coachId?: string | undefined;
   limit: number;
   offset: number;
   today: string;
@@ -75,6 +76,7 @@ export const memberRepo = {
       birthDate: row.birthDate,
       email: row.email,
       phone: row.phone,
+      coachId: row.coachId,
       version: row.version,
       subscriptions: owned.map(toSubscription),
     });
@@ -105,13 +107,16 @@ export const memberRepo = {
     options: MemberSearch,
   ): Promise<{ rows: MemberListRow[]; total: number }> {
     const pattern = options.q ? `%${escapeLike(options.q)}%` : undefined;
-    const filter = pattern
-      ? or(
-          ilike(members.fullName, pattern),
-          ilike(members.email, pattern),
-          ilike(members.phone, pattern),
-        )
-      : undefined;
+    const filter = and(
+      pattern
+        ? or(
+            ilike(members.fullName, pattern),
+            ilike(members.email, pattern),
+            ilike(members.phone, pattern),
+          )
+        : undefined,
+      options.coachId ? eq(members.coachId, options.coachId) : undefined,
+    );
 
     const page = await db
       .select({

@@ -100,6 +100,19 @@ describe("Member.updateProfile", () => {
   });
 });
 
+describe("Member.assignCoach", () => {
+  it("starts without a coach and can switch or clear the assignment", () => {
+    const member = registered();
+    expect(member.toSnapshot().coachId).toBeNull();
+
+    member.assignCoach("coach-1");
+    expect(member.toSnapshot().coachId).toBe("coach-1");
+
+    member.assignCoach(null);
+    expect(member.toSnapshot().coachId).toBeNull();
+  });
+});
+
 describe("subscription helpers", () => {
   const subscription = {
     id: "s1",

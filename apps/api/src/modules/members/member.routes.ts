@@ -1,5 +1,6 @@
 import {
   checkInView,
+  coachAssignment,
   id,
   memberChanges,
   memberPage,
@@ -107,5 +108,23 @@ export const memberRoutes: FastifyPluginAsync<MemberRoutesOptions> = async (
       schema: { params: idParams, querystring: visitHistoryQuery, response: { 200: visitPage } },
     },
     async (request) => service.visits(request.params.id, request.query),
+  );
+
+  api.put(
+    "/api/members/:id/coach",
+    {
+      preHandler: frontDesk,
+      schema: { params: idParams, body: coachAssignment, response: { 200: memberView } },
+    },
+    async (request) => service.assignCoach(request.params.id, request.body.coachId),
+  );
+
+  api.get(
+    "/api/coaches/:id/members",
+    {
+      preHandler: anyStaff,
+      schema: { params: idParams, querystring: memberSearch, response: { 200: memberPage } },
+    },
+    async (request) => service.membersOfCoach(request.params.id, request.query),
   );
 };

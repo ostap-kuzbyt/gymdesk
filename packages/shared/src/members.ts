@@ -56,6 +56,7 @@ export const visitPage = z.object({
 
 export const memberView = memberFields.extend({
   id,
+  coachId: id.nullable(),
   age: z.number().int(),
   version: z.number().int().min(1),
   subscriptions: z.array(subscriptionView),

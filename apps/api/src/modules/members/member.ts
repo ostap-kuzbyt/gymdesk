@@ -19,6 +19,7 @@ export interface MemberProfile {
 
 export interface MemberSnapshot extends MemberProfile {
   id: string;
+  coachId: string | null;
   version: number;
   subscriptions: Subscription[];
 }
@@ -74,7 +75,7 @@ export class Member {
 
   static register(input: NewMember, today: string, id: string = randomUUID()): Member {
     const profile = validateProfile({ ...input, phone: input.phone ?? null }, today);
-    return new Member({ id, ...profile, version: 1, subscriptions: [] });
+    return new Member({ id, ...profile, coachId: null, version: 1, subscriptions: [] });
   }
 
   static restore(snapshot: MemberSnapshot): Member {
@@ -114,6 +115,10 @@ export class Member {
       today,
     );
     this.snapshot = { ...this.snapshot, ...profile };
+  }
+
+  assignCoach(coachId: string | null): void {
+    this.snapshot = { ...this.snapshot, coachId };
   }
 
   purchase(offer: SubscriptionOffer, id: string = randomUUID()): Subscription {

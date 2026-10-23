@@ -1,6 +1,8 @@
 import Fastify from "fastify";
 import type { FastifyInstance } from "fastify";
 import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
+import { coachRoutes } from "./modules/coaches/coach.routes.js";
+import { CoachService } from "./modules/coaches/coach.service.js";
 import { memberRoutes } from "./modules/members/member.routes.js";
 import { MemberService } from "./modules/members/member.service.js";
 import { studioRoutes } from "./modules/studios/studio.routes.js";
@@ -43,12 +45,14 @@ export function buildApp(config: Config, overrides: AppOverrides = {}): FastifyI
   const requireRole = registerAuth(app, overrides.verifier ?? createAuth0Verifier(config));
 
   const tariffService = new TariffService(db);
+  const coachService = new CoachService(db);
 
   app.register(healthRoutes);
   app.register(memberRoutes, {
-    service: new MemberService(db, clock, tariffService),
+    service: new MemberService(db, clock, tariffService, coachService),
     requireRole,
   });
+  app.register(coachRoutes, { service: coachService, requireRole });
   app.register(studioRoutes, { service: new StudioService(db), requireRole });
   app.register(tariffRoutes, { service: tariffService, requireRole });
 
