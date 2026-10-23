@@ -7,6 +7,8 @@ import { memberRoutes } from "./modules/members/member.routes.js";
 import { MemberService } from "./modules/members/member.service.js";
 import { studioRoutes } from "./modules/studios/studio.routes.js";
 import { StudioService } from "./modules/studios/studio.service.js";
+import { workoutRoutes } from "./modules/workouts/workout.routes.js";
+import { WorkoutService } from "./modules/workouts/workout.service.js";
 import { tariffRoutes } from "./modules/tariffs/tariff.routes.js";
 import { TariffService } from "./modules/tariffs/tariff.service.js";
 import { createAuth0Verifier, registerAuth } from "./platform/auth.js";
@@ -46,15 +48,16 @@ export function buildApp(config: Config, overrides: AppOverrides = {}): FastifyI
 
   const tariffService = new TariffService(db);
   const coachService = new CoachService(db);
+  const studioService = new StudioService(db);
+  const memberService = new MemberService(db, clock, tariffService, coachService);
+  const workoutService = new WorkoutService(db, clock, studioService, coachService, memberService);
 
   app.register(healthRoutes);
-  app.register(memberRoutes, {
-    service: new MemberService(db, clock, tariffService, coachService),
-    requireRole,
-  });
-  app.register(coachRoutes, { service: coachService, requireRole });
-  app.register(studioRoutes, { service: new StudioService(db), requireRole });
   app.register(tariffRoutes, { service: tariffService, requireRole });
+  app.register(studioRoutes, { service: studioService, requireRole });
+  app.register(coachRoutes, { service: coachService, requireRole });
+  app.register(memberRoutes, { service: memberService, requireRole });
+  app.register(workoutRoutes, { service: workoutService, requireRole });
 
   return app;
 }

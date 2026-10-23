@@ -115,6 +115,22 @@ export class MemberService {
     return this.search({ ...page, coachId });
   }
 
+  async requireActiveSubscriptionOn(memberId: string, date: string): Promise<void> {
+    const member = await memberRepo.findById(this.db, memberId);
+    if (!member) throw new NotFoundError("Member was not found");
+
+    const covered = member
+      .toSnapshot()
+      .subscriptions.some((subscription) => statusOn(subscription, date) === "active");
+    if (!covered) {
+      throw new DomainError(`The member has no active subscription on ${date}`);
+    }
+  }
+
+  names(ids: string[]): Promise<Map<string, string>> {
+    return memberRepo.namesByIds(this.db, ids);
+  }
+
   checkIn(memberId: string): Promise<CheckInDetails> {
     const today = this.clock.today();
     const checkedInAt = this.clock.now();

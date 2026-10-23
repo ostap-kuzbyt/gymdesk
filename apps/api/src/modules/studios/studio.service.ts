@@ -1,6 +1,6 @@
 import type { Db } from "../../platform/db/client.js";
 import { withTx } from "../../platform/db/tx.js";
-import { ConflictError, NotFoundError } from "../../platform/errors.js";
+import { ConflictError, DomainError, NotFoundError } from "../../platform/errors.js";
 import { Studio } from "./studio.js";
 import type { NewStudio, StudioChanges, StudioSnapshot } from "./studio.js";
 import { studioRepo } from "./studio.repo.js";
@@ -17,6 +17,12 @@ export class StudioService {
     const studio = await studioRepo.findById(this.db, id);
     if (!studio) throw new NotFoundError("Studio was not found");
     return studio.toSnapshot();
+  }
+
+  async requireActive(id: string): Promise<StudioSnapshot> {
+    const studio = await this.get(id);
+    if (studio.archived) throw new DomainError("The studio has been archived");
+    return studio;
   }
 
   create(input: NewStudio): Promise<StudioSnapshot> {

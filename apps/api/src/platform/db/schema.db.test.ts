@@ -4,7 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createTestDb } from "../../testing/test-db.js";
 import type { TestDb } from "../../testing/test-db.js";
 import { ConflictError } from "../errors.js";
-import { checkIns, members, subscriptions, tariffs } from "./schema.js";
+import { checkIns, coaches, members, studios, subscriptions, tariffs, workouts } from "./schema.js";
 import { withTx } from "./tx.js";
 
 const TARIFF_ID = "00000000-0000-4000-8000-000000000001";
@@ -153,5 +153,63 @@ describe("members", () => {
         }),
       ),
     ).rejects.toBeInstanceOf(ConflictError);
+  });
+});
+
+describe("workouts", () => {
+  async function seedResources() {
+    const studioId = randomUUID();
+    const coachId = randomUUID();
+    await testDb.db
+      .insert(studios)
+      .values({ id: studioId, name: `Studio ${studioId}`, capacity: 20 });
+    await testDb.db
+      .insert(coaches)
+      .values({ id: coachId, fullName: "Coach", specialization: "Fitness" });
+    return { studioId, coachId };
+  }
+
+  function addWorkout(
+    resources: { studioId: string; coachId: string },
+    startTime: string,
+    endTime: string,
+    options: { cancelled?: boolean; studioId?: string; coachId?: string } = {},
+  ) {
+    return withTx(testDb.db, (tx) =>
+      tx.insert(workouts).values({
+        id: randomUUID(),
+        title: "Class",
+        kind: "group",
+        studioId: options.studioId ?? resources.studioId,
+        coachId: options.coachId ?? resources.coachId,
+        workoutDate: "2026-10-22",
+        startTime,
+        endTime,
+        capacity: 10,
+        cancelled: options.cancelled ?? false,
+      }),
+    );
+  }
+
+  it("rejects overlapping workouts in one studio or for one coach as conflicts", async () => {
+    const resources = await seedResources();
+    await addWorkout(resources, "10:00", "11:00");
+
+    const otherCoach = await seedResources();
+    await expect(
+      addWorkout(resources, "10:30", "11:30", { coachId: otherCoach.coachId }),
+    ).rejects.toBeInstanceOf(ConflictError);
+
+    await expect(
+      addWorkout(resources, "10:30", "11:30", { studioId: otherCoach.studioId }),
+    ).rejects.toBeInstanceOf(ConflictError);
+  });
+
+  it("allows back-to-back workouts and overlaps with a cancelled one", async () => {
+    const resources = await seedResources();
+    await addWorkout(resources, "10:00", "11:00", { cancelled: true });
+
+    await expect(addWorkout(resources, "10:00", "11:00")).resolves.toBeDefined();
+    await expect(addWorkout(resources, "11:00", "12:00")).resolves.toBeDefined();
   });
 });

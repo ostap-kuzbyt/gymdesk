@@ -8,6 +8,7 @@ import {
   jsonb,
   pgTable,
   text,
+  time,
   timestamp,
   uniqueIndex,
   uuid,
@@ -133,5 +134,55 @@ export const checkIns = pgTable(
     uniqueIndex("check_ins_member_day_unique").on(table.memberId, table.visitDate),
     index("check_ins_subscription_idx").on(table.subscriptionId),
     index("check_ins_visit_date_idx").on(table.visitDate),
+  ],
+);
+
+export const workouts = pgTable(
+  "workouts",
+  {
+    id: uuid("id").primaryKey(),
+    title: text("title").notNull(),
+    kind: text("kind").notNull(),
+    studioId: uuid("studio_id")
+      .notNull()
+      .references(() => studios.id),
+    coachId: uuid("coach_id")
+      .notNull()
+      .references(() => coaches.id),
+    workoutDate: date("workout_date", { mode: "string" }).notNull(),
+    startTime: time("start_time").notNull(),
+    endTime: time("end_time").notNull(),
+    capacity: integer("capacity").notNull(),
+    cancelled: boolean("cancelled").notNull().default(false),
+    version: integer("version").notNull().default(1),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("workouts_date_idx").on(table.workoutDate),
+    index("workouts_coach_idx").on(table.coachId),
+    check("workouts_kind_known", sql`${table.kind} in ('group', 'individual')`),
+    check("workouts_capacity_positive", sql`${table.capacity} >= 1`),
+    check("workouts_time_ordered", sql`${table.endTime} > ${table.startTime}`),
+  ],
+);
+
+export const reservations = pgTable(
+  "reservations",
+  {
+    id: uuid("id").primaryKey(),
+    workoutId: uuid("workout_id")
+      .notNull()
+      .references(() => workouts.id, { onDelete: "cascade" }),
+    memberId: uuid("member_id")
+      .notNull()
+      .references(() => members.id),
+    reservedAt: timestamp("reserved_at", { withTimezone: true }).notNull(),
+    cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
+  },
+  (table) => [
+    uniqueIndex("reservations_active_member_unique")
+      .on(table.workoutId, table.memberId)
+      .where(sql`${table.cancelledAt} is null`),
+    index("reservations_member_idx").on(table.memberId),
   ],
 );

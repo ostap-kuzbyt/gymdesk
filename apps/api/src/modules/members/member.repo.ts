@@ -213,4 +213,13 @@ export const memberRepo = {
 
     return { rows, total: totals?.total ?? 0 };
   },
+
+  async namesByIds(db: Executor, ids: string[]): Promise<Map<string, string>> {
+    if (ids.length === 0) return new Map();
+    const rows = await db
+      .select({ id: members.id, fullName: members.fullName })
+      .from(members)
+      .where(inArray(members.id, ids));
+    return new Map(rows.map((row) => [row.id, row.fullName]));
+  },
 };
