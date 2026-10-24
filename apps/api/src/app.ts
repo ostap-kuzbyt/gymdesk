@@ -3,6 +3,7 @@ import type { FastifyInstance } from "fastify";
 import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
 import { coachRoutes } from "./modules/coaches/coach.routes.js";
 import { CoachService } from "./modules/coaches/coach.service.js";
+import { registerExpiryScan } from "./modules/reminders/reminder.job.js";
 import { reminderRoutes } from "./modules/reminders/reminder.routes.js";
 import { ReminderService } from "./modules/reminders/reminder.service.js";
 import { memberRoutes } from "./modules/members/member.routes.js";
@@ -23,12 +24,15 @@ import type { Db } from "./platform/db/client.js";
 import { registerErrorHandler } from "./platform/errors.js";
 import { createMailer } from "./platform/mailer.js";
 import type { Mailer } from "./platform/mailer.js";
+import { createPgBossQueue } from "./platform/queue.js";
+import type { Queue } from "./platform/queue.js";
 import { healthRoutes } from "./platform/health.routes.js";
 
 export interface AppOverrides {
   db?: Db;
   clock?: Clock;
   mailer?: Mailer;
+  queue?: Queue;
   verifier?: TokenVerifier;
 }
 
@@ -61,6 +65,23 @@ export function buildApp(config: Config, overrides: AppOverrides = {}): FastifyI
     daysBefore: config.REMINDER_DAYS_BEFORE,
     discountPercent: config.PROMO_DISCOUNT_PERCENT,
   });
+  const queue =
+    overrides.queue ??
+    (config.RUN_JOBS && config.NODE_ENV !== "test"
+      ? createPgBossQueue(config.DATABASE_URL, app.log)
+      : undefined);
+  if (queue) {
+    app.addHook("onReady", async () => {
+      await queue.start();
+      await registerExpiryScan(queue, reminderService, {
+        cron: config.EXPIRY_SCAN_CRON,
+        timeZone: config.CLUB_TIMEZONE,
+        onFinished: (result) => app.log.info(result, "Expiry reminder scan finished"),
+      });
+    });
+    app.addHook("onClose", () => queue.stop());
+  }
+
   const workoutService = new WorkoutService(db, clock, studioService, coachService, memberService);
 
   app.register(healthRoutes);

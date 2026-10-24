@@ -58,6 +58,22 @@ describe("loadConfig", () => {
     expect(() => loadConfig({ ...required, PROMO_DISCOUNT_PERCENT: "95" })).toThrow(/PROMO/);
   });
 
+  it("runs background jobs at 08:00 by default and accepts overrides", () => {
+    expect(loadConfig(required)).toMatchObject({ RUN_JOBS: true, EXPIRY_SCAN_CRON: "0 8 * * *" });
+    expect(
+      loadConfig({ ...required, RUN_JOBS: "false", EXPIRY_SCAN_CRON: "30 6 * * 1-5" }),
+    ).toMatchObject({
+      RUN_JOBS: false,
+      EXPIRY_SCAN_CRON: "30 6 * * 1-5",
+    });
+  });
+
+  it("rejects a cron expression that does not have five fields", () => {
+    expect(() => loadConfig({ ...required, EXPIRY_SCAN_CRON: "every morning" })).toThrow(
+      /EXPIRY_SCAN_CRON/,
+    );
+  });
+
   it("rejects an unknown time zone", () => {
     expect(() => loadConfig({ ...required, CLUB_TIMEZONE: "Mars/Olympus" })).toThrow(
       /CLUB_TIMEZONE/,

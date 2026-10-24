@@ -31,6 +31,12 @@ const configSchema = z
     CLUB_NAME: z.string().trim().min(1).default("Gymdesk"),
     REMINDER_DAYS_BEFORE: z.coerce.number().int().min(1).max(60).default(7),
     PROMO_DISCOUNT_PERCENT: z.coerce.number().int().min(1).max(90).default(10),
+    RUN_JOBS: z.stringbool().default(true),
+    EXPIRY_SCAN_CRON: z
+      .string()
+      .trim()
+      .regex(/^(\S+\s+){4}\S+$/, "Must be a five-field cron expression")
+      .default("0 8 * * *"),
     SENDGRID_API_KEY: optionalText,
     MAIL_FROM: optionalText,
   })
