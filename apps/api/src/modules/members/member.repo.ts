@@ -1,4 +1,20 @@
-import { and, asc, count, desc, eq, gte, ilike, inArray, isNull, lte, or, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  gt,
+  gte,
+  ilike,
+  inArray,
+  isNull,
+  lte,
+  notExists,
+  or,
+  sql,
+} from "drizzle-orm";
 import { checkIns, members, subscriptions } from "../../platform/db/schema.js";
 import type { Executor } from "../../platform/db/tx.js";
 import { ConflictError } from "../../platform/errors.js";
@@ -22,6 +38,14 @@ export interface VisitRow {
   subscriptionId: string;
   visitDate: string;
   checkedInAt: Date;
+}
+
+export interface ExpiringRow {
+  memberId: string;
+  fullName: string;
+  email: string;
+  subscriptionId: string;
+  endsOn: string;
 }
 
 export interface MemberSearch {
@@ -221,5 +245,40 @@ export const memberRepo = {
       .from(members)
       .where(inArray(members.id, ids));
     return new Map(rows.map((row) => [row.id, row.fullName]));
+  },
+
+  async findExpiring(db: Executor, today: string, lastDay: string): Promise<ExpiringRow[]> {
+    const renewal = alias(subscriptions, "renewal");
+    return db
+      .select({
+        memberId: members.id,
+        fullName: members.fullName,
+        email: members.email,
+        subscriptionId: subscriptions.id,
+        endsOn: subscriptions.endsOn,
+      })
+      .from(subscriptions)
+      .innerJoin(members, eq(members.id, subscriptions.memberId))
+      .where(
+        and(
+          isNull(subscriptions.cancelledOn),
+          lte(subscriptions.startsOn, today),
+          gte(subscriptions.endsOn, today),
+          lte(subscriptions.endsOn, lastDay),
+          notExists(
+            db
+              .select({ one: sql`1` })
+              .from(renewal)
+              .where(
+                and(
+                  eq(renewal.memberId, subscriptions.memberId),
+                  isNull(renewal.cancelledOn),
+                  gt(renewal.startsOn, subscriptions.endsOn),
+                ),
+              ),
+          ),
+        ),
+      )
+      .orderBy(asc(subscriptions.endsOn), asc(members.fullName), asc(subscriptions.id));
   },
 };

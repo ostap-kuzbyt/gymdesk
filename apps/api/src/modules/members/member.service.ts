@@ -8,6 +8,7 @@ import type { CheckIn } from "./check-in.js";
 import { Member, ageOn } from "./member.js";
 import type { MemberChanges, MemberSnapshot, NewMember } from "./member.js";
 import { memberRepo } from "./member.repo.js";
+import type { ExpiringRow } from "./member.repo.js";
 import { statusOn } from "./subscription.js";
 import type { Subscription, SubscriptionStatus } from "./subscription.js";
 
@@ -44,6 +45,14 @@ export interface VisitItem {
 export interface VisitPage {
   items: VisitItem[];
   total: number;
+}
+
+export type ExpiringSubscription = ExpiringRow;
+
+export interface ReminderContext {
+  fullName: string;
+  email: string;
+  subscriptions: { id: string; startsOn: string; endsOn: string }[];
 }
 
 export interface PageQuery {
@@ -125,6 +134,24 @@ export class MemberService {
     if (!covered) {
       throw new DomainError(`The member has no active subscription on ${date}`);
     }
+  }
+
+  findExpiring(today: string, lastDay: string): Promise<ExpiringSubscription[]> {
+    return memberRepo.findExpiring(this.db, today, lastDay);
+  }
+
+  async reminderContext(memberId: string): Promise<ReminderContext> {
+    const member = await memberRepo.findById(this.db, memberId);
+    if (!member) throw new NotFoundError("Member was not found");
+
+    const { fullName, email, subscriptions } = member.toSnapshot();
+    return {
+      fullName,
+      email,
+      subscriptions: subscriptions
+        .filter((subscription) => subscription.cancelledOn === null)
+        .map(({ id, startsOn, endsOn }) => ({ id, startsOn, endsOn })),
+    };
   }
 
   names(ids: string[]): Promise<Map<string, string>> {

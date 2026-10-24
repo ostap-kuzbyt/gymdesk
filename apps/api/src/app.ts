@@ -3,6 +3,8 @@ import type { FastifyInstance } from "fastify";
 import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
 import { coachRoutes } from "./modules/coaches/coach.routes.js";
 import { CoachService } from "./modules/coaches/coach.service.js";
+import { reminderRoutes } from "./modules/reminders/reminder.routes.js";
+import { ReminderService } from "./modules/reminders/reminder.service.js";
 import { memberRoutes } from "./modules/members/member.routes.js";
 import { MemberService } from "./modules/members/member.service.js";
 import { studioRoutes } from "./modules/studios/studio.routes.js";
@@ -19,11 +21,14 @@ import type { Config } from "./platform/config.js";
 import { createDb } from "./platform/db/client.js";
 import type { Db } from "./platform/db/client.js";
 import { registerErrorHandler } from "./platform/errors.js";
+import { createMailer } from "./platform/mailer.js";
+import type { Mailer } from "./platform/mailer.js";
 import { healthRoutes } from "./platform/health.routes.js";
 
 export interface AppOverrides {
   db?: Db;
   clock?: Clock;
+  mailer?: Mailer;
   verifier?: TokenVerifier;
 }
 
@@ -50,6 +55,12 @@ export function buildApp(config: Config, overrides: AppOverrides = {}): FastifyI
   const coachService = new CoachService(db);
   const studioService = new StudioService(db);
   const memberService = new MemberService(db, clock, tariffService, coachService);
+  const mailer = overrides.mailer ?? createMailer(config, app.log);
+  const reminderService = new ReminderService(db, clock, mailer, memberService, {
+    clubName: config.CLUB_NAME,
+    daysBefore: config.REMINDER_DAYS_BEFORE,
+    discountPercent: config.PROMO_DISCOUNT_PERCENT,
+  });
   const workoutService = new WorkoutService(db, clock, studioService, coachService, memberService);
 
   app.register(healthRoutes);
@@ -58,6 +69,7 @@ export function buildApp(config: Config, overrides: AppOverrides = {}): FastifyI
   app.register(coachRoutes, { service: coachService, requireRole });
   app.register(memberRoutes, { service: memberService, requireRole });
   app.register(workoutRoutes, { service: workoutService, requireRole });
+  app.register(reminderRoutes, { service: reminderService, requireRole });
 
   return app;
 }
