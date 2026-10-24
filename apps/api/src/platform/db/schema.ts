@@ -186,3 +186,38 @@ export const reservations = pgTable(
     index("reservations_member_idx").on(table.memberId),
   ],
 );
+
+export const reminders = pgTable(
+  "reminders",
+  {
+    id: uuid("id").primaryKey(),
+    memberId: uuid("member_id")
+      .notNull()
+      .references(() => members.id, { onDelete: "cascade" }),
+    subscriptionId: uuid("subscription_id").references(() => subscriptions.id, {
+      onDelete: "cascade",
+    }),
+    kind: text("kind").notNull(),
+    trigger: text("trigger").notNull(),
+    email: text("email").notNull(),
+    status: text("status").notNull().default("pending"),
+    attempts: integer("attempts").notNull().default(0),
+    error: text("error"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+  },
+  (table) => [
+    uniqueIndex("reminders_scan_expiry_unique")
+      .on(table.subscriptionId)
+      .where(sql`${table.kind} = 'expiry' and ${table.trigger} = 'scan'`),
+    index("reminders_member_idx").on(table.memberId),
+    index("reminders_created_idx").on(table.createdAt),
+    check("reminders_kind_known", sql`${table.kind} in ('expiry', 'promo')`),
+    check("reminders_trigger_known", sql`${table.trigger} in ('scan', 'manual')`),
+    check("reminders_status_known", sql`${table.status} in ('pending', 'sent', 'failed')`),
+    check(
+      "reminders_expiry_has_subscription",
+      sql`${table.kind} <> 'expiry' or ${table.subscriptionId} is not null`,
+    ),
+  ],
+);
