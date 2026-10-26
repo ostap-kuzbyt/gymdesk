@@ -12,7 +12,8 @@
     "db:generate": "node --env-file-if-exists=../../.env ../../node_modules/.bin/drizzle-kit generate",
     "db:migrate": "node --env-file-if-exists=../../.env ../../node_modules/.bin/drizzle-kit migrate",
     "test:unit": "vitest run --project unit",
-    "check:boundaries": "depcruise src --config .dependency-cruiser.cjs"
+    "check:boundaries": "depcruise src --config .dependency-cruiser.cjs",
+    "db:seed": "tsx --env-file-if-exists=../../.env src/seed.ts"
   },
   "devDependencies": {
     "@testcontainers/postgresql": "^12.2.1",
