@@ -16,6 +16,7 @@ import type { Clock } from "./platform/clock.js";
 import type { Config } from "./platform/config.js";
 import { createDb } from "./platform/db/client.js";
 import type { Db } from "./platform/db/client.js";
+import { registerDocs } from "./platform/docs.js";
 import { registerErrorHandler } from "./platform/errors.js";
 import { createMailer } from "./platform/mailer.js";
 import type { Mailer } from "./platform/mailer.js";
@@ -41,6 +42,7 @@ export function buildApp(config: Config, overrides: AppOverrides = {}): FastifyI
   app.setSerializerCompiler(serializerCompiler);
 
   registerErrorHandler(app);
+  registerDocs(app, config);
 
   let db = overrides.db;
   if (!db) {
