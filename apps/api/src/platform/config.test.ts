@@ -68,6 +68,11 @@ describe("loadConfig", () => {
     });
   });
 
+  it("applies migrations on start only when asked to", () => {
+    expect(loadConfig(required).MIGRATE_ON_START).toBe(false);
+    expect(loadConfig({ ...required, MIGRATE_ON_START: "true" }).MIGRATE_ON_START).toBe(true);
+  });
+
   it("rejects a cron expression that does not have five fields", () => {
     expect(() => loadConfig({ ...required, EXPIRY_SCAN_CRON: "every morning" })).toThrow(
       /EXPIRY_SCAN_CRON/,

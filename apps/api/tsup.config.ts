@@ -1,3 +1,4 @@
+import { cpSync } from "node:fs";
 import { defineConfig } from "tsup";
 
 export default defineConfig({
@@ -6,4 +7,7 @@ export default defineConfig({
   target: "node24",
   clean: true,
   noExternal: ["@gymdesk/shared"],
+  onSuccess: async () => {
+    cpSync("src/platform/db/migrations", "dist/migrations", { recursive: true });
+  },
 });

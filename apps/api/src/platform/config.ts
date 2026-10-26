@@ -32,6 +32,7 @@ const configSchema = z
     REMINDER_DAYS_BEFORE: z.coerce.number().int().min(1).max(60).default(7),
     PROMO_DISCOUNT_PERCENT: z.coerce.number().int().min(1).max(90).default(10),
     RUN_JOBS: z.stringbool().default(true),
+    MIGRATE_ON_START: z.stringbool().default(false),
     EXPIRY_SCAN_CRON: z
       .string()
       .trim()
