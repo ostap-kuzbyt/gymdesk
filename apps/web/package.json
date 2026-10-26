@@ -22,8 +22,10 @@
     "vitest": "^5.0.5"
   },
   "dependencies": {
+    "@auth0/auth0-react": "^2.8.0",
     "@fontsource-variable/archivo": "^5.2.0",
     "@gymdesk/shared": "*",
+    "@tanstack/react-query": "^5.90.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.61.0",
