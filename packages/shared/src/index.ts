@@ -2,6 +2,7 @@ export * from "./coaches.js";
 export * from "./members.js";
 export * from "./primitives.js";
 export * from "./reminders.js";
+export * from "./reports.js";
 export * from "./roles.js";
 export * from "./studios.js";
 export * from "./tariffs.js";

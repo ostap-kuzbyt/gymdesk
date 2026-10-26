@@ -4,6 +4,8 @@ import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod
 import { coachRoutes } from "./modules/coaches/coach.routes.js";
 import { CoachService } from "./modules/coaches/coach.service.js";
 import { registerExpiryScan } from "./modules/reminders/reminder.job.js";
+import { reportRoutes } from "./modules/reports/report.routes.js";
+import { ReportService } from "./modules/reports/report.service.js";
 import { reminderRoutes } from "./modules/reminders/reminder.routes.js";
 import { ReminderService } from "./modules/reminders/reminder.service.js";
 import { memberRoutes } from "./modules/members/member.routes.js";
@@ -91,6 +93,7 @@ export function buildApp(config: Config, overrides: AppOverrides = {}): FastifyI
   app.register(memberRoutes, { service: memberService, requireRole });
   app.register(workoutRoutes, { service: workoutService, requireRole });
   app.register(reminderRoutes, { service: reminderService, requireRole });
+  app.register(reportRoutes, { service: new ReportService(db, clock), requireRole });
 
   return app;
 }
