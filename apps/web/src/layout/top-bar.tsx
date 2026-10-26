@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ChevronDown, LogOut, Menu } from "lucide-react";
+import { ChevronDown, LogOut, Menu, Search } from "lucide-react";
 import { useState } from "react";
 import { useSession } from "@/auth/session";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -15,6 +15,7 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { ROLE_LABELS, navFor } from "@/nav";
+import { usePalette } from "@/palette/palette-context";
 
 const tabClass =
   "relative flex h-14 items-center px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:-outline-offset-2";
@@ -122,6 +123,34 @@ function MobileNav() {
   );
 }
 
+function SearchButton() {
+  const { open } = usePalette();
+  const shortcut = /Mac|iPhone|iPad/.test(navigator.platform) ? "⌘K" : "Ctrl K";
+
+  return (
+    <>
+      <Button
+        variant="outline"
+        className="hidden w-52 justify-start gap-2 text-muted-foreground lg:inline-flex"
+        onClick={open}
+      >
+        <Search />
+        <span>Search or jump to</span>
+        <span className="ml-auto text-xs">{shortcut}</span>
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="lg:hidden"
+        onClick={open}
+        aria-label="Search or jump to"
+      >
+        <Search />
+      </Button>
+    </>
+  );
+}
+
 export function TopBar() {
   const { roles } = useSession();
 
@@ -146,6 +175,7 @@ export function TopBar() {
         <ClubMenu items={navFor(roles, "club")} />
       </nav>
       <div className="ml-auto flex items-center gap-1">
+        <SearchButton />
         <ThemeToggle />
         <UserMenu />
       </div>

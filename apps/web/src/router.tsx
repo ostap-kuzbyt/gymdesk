@@ -13,9 +13,16 @@ const page = (path: string, title: string) =>
     component: () => <PlaceholderPage title={title} />,
   });
 
+const memberRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "members/$memberId",
+  component: () => <PlaceholderPage title="Member" />,
+});
+
 const routeTree = rootRoute.addChildren([
   page("/", "Today"),
   page("members", "Members"),
+  memberRoute,
   page("schedule", "Schedule"),
   page("reminders", "Reminders"),
   page("reports", "Reports"),
