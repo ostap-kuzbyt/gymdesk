@@ -2,6 +2,7 @@ import { createRootRoute, createRoute, createRouter } from "@tanstack/react-rout
 import type { RouterHistory } from "@tanstack/react-router";
 import { AppLayout } from "@/layout/app-layout";
 import { NotFound } from "@/pages/not-found";
+import { MembersPage } from "@/pages/members-page";
 import { PlaceholderPage } from "@/pages/placeholder-page";
 import { StudiosPage } from "@/pages/studios-page";
 import { TariffsPage } from "@/pages/tariffs-page";
@@ -23,7 +24,20 @@ const memberRoute = createRoute({
 
 const routeTree = rootRoute.addChildren([
   page("/", "Today"),
-  page("members", "Members"),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "members",
+    component: MembersPage,
+    validateSearch: (
+      search: Record<string, unknown>,
+    ): { q?: string | undefined; page?: number | undefined } => {
+      const page = Number(search.page);
+      return {
+        q: typeof search.q === "string" && search.q !== "" ? search.q : undefined,
+        page: Number.isInteger(page) && page > 1 ? page : undefined,
+      };
+    },
+  }),
   memberRoute,
   page("schedule", "Schedule"),
   page("reminders", "Reminders"),

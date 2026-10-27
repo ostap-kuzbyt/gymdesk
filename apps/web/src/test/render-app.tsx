@@ -20,8 +20,8 @@ export interface RenderOptions {
 export function renderApp({
   roles = ["admin"],
   path = "/",
-  name = "Olena Shevchenko",
-  email = "olena@club.test",
+  name = "Iryna Frontdesk",
+  email = "iryna@club.test",
   fetch: fetchStub,
 }: RenderOptions = {}) {
   if (fetchStub) vi.stubGlobal("fetch", fetchStub);

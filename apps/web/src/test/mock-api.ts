@@ -73,6 +73,10 @@ export function mockApi(routes: Record<string, Handler>) {
   });
 
   return Object.assign(fetchMock as unknown as typeof fetch, {
+    urls: (method: string) =>
+      fetchMock.mock.calls
+        .filter(([, init]) => (init?.method ?? "GET").toUpperCase() === method)
+        .map(([input]) => String(input)),
     calls: (method: string, pathPrefix = "") =>
       fetchMock.mock.calls
         .map(([input, init]) => ({

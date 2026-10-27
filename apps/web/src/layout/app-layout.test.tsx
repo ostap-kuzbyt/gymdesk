@@ -65,7 +65,7 @@ describe("top bar", () => {
 
     await user.click(screen.getByRole("button", { name: "Account menu" }));
 
-    expect(await screen.findByText("olena@club.test")).toBeInTheDocument();
+    expect(await screen.findByText("iryna@club.test")).toBeInTheDocument();
     expect(screen.getByText("Reception, Coach")).toBeInTheDocument();
 
     await user.click(screen.getByRole("menuitem", { name: "Sign out" }));
