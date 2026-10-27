@@ -1,20 +1,24 @@
-import type { MemberView } from "@gymdesk/shared";
+import type { MemberView, SubscriptionView } from "@gymdesk/shared";
 import { getRouteApi, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useSession } from "@/auth/session";
+import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { PageHeader } from "@/components/page-header";
 import { PlateBadge } from "@/components/plate-badge";
 import { EmptyState, ErrorNotice, TableSkeleton } from "@/components/query-states";
 import { Button } from "@/components/ui/button";
 import { useCheckIn } from "@/features/use-check-in";
-import { useMember } from "@/features/members/api";
+import { useCancelSubscription, useMember } from "@/features/members/api";
 import { CoachSelect } from "@/features/members/coach-select";
 import { EditMemberDialog } from "@/features/members/edit-member-dialog";
+import { SellSubscriptionDialog } from "@/features/members/sell-subscription-dialog";
 import { SubscriptionsTable } from "@/features/members/subscriptions-table";
 import { VisitsTable } from "@/features/members/visits-table";
 import { useTariffs } from "@/features/tariffs/api";
 import { ApiError } from "@/lib/api";
-import { formatDate, todayLocal } from "@/lib/format";
+import { messageOf } from "@/lib/errors";
+import { formatDate, formatPeriod, todayLocal } from "@/lib/format";
 import { isFrontDesk } from "@/lib/permissions";
 import { plateFor } from "@/lib/plates";
 
@@ -57,6 +61,9 @@ function MemberProfile({ member }: { member: MemberView }) {
   const { roles } = useSession();
   const frontDesk = isFrontDesk(roles);
   const [editing, setEditing] = useState(false);
+  const [selling, setSelling] = useState(false);
+  const [toCancel, setToCancel] = useState<SubscriptionView | null>(null);
+  const cancel = useCancelSubscription(member.id);
   const { checkIn, isPending } = useCheckIn();
   const tariffs = useTariffs(true);
   const today = todayLocal();
@@ -105,7 +112,7 @@ function MemberProfile({ member }: { member: MemberView }) {
                   : "No active subscription"}
               </div>
               <div className="text-sm text-muted-foreground">
-                {plate?.label ?? "Sell one on the next step"}
+                {plate?.label ?? (frontDesk ? "Sell one below" : "Nothing running")}
               </div>
             </div>
           </div>
@@ -123,14 +130,30 @@ function MemberProfile({ member }: { member: MemberView }) {
       </div>
 
       <div>
-        <h2 className="mb-3">Subscriptions</h2>
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h2>Subscriptions</h2>
+          {frontDesk && member.subscriptions.length > 0 ? (
+            <Button variant="outline" onClick={() => setSelling(true)}>
+              Sell subscription
+            </Button>
+          ) : null}
+        </div>
         {member.subscriptions.length === 0 ? (
           <EmptyState
             title="No subscriptions yet"
             hint="Subscriptions the member buys will be listed here."
+            action={
+              frontDesk ? (
+                <Button onClick={() => setSelling(true)}>Sell subscription</Button>
+              ) : undefined
+            }
           />
         ) : (
-          <SubscriptionsTable subscriptions={member.subscriptions} tariffs={tariffs.data ?? []} />
+          <SubscriptionsTable
+            subscriptions={member.subscriptions}
+            tariffs={tariffs.data ?? []}
+            {...(frontDesk ? { onCancel: setToCancel } : {})}
+          />
         )}
       </div>
 
@@ -146,6 +169,34 @@ function MemberProfile({ member }: { member: MemberView }) {
       </div>
 
       <EditMemberDialog open={editing} onOpenChange={setEditing} member={member} />
+      <SellSubscriptionDialog open={selling} onOpenChange={setSelling} member={member} />
+      <ConfirmDialog
+        open={toCancel !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setToCancel(null);
+            cancel.reset();
+          }
+        }}
+        title={`Cancel ${toCancel ? tariffName(toCancel.tariffId) : ""} subscription?`}
+        description={
+          toCancel
+            ? `${formatPeriod(toCancel.startsOn, toCancel.endsOn)}. The member can no longer check in with it, and it is left out of revenue reports. Nothing is refunded automatically.`
+            : ""
+        }
+        confirmLabel="Cancel subscription"
+        pending={cancel.isPending}
+        error={cancel.isError ? messageOf(cancel.error) : undefined}
+        onConfirm={() => {
+          if (!toCancel) return;
+          cancel.mutate(toCancel.id, {
+            onSuccess: () => {
+              toast.success("Subscription cancelled");
+              setToCancel(null);
+            },
+          });
+        }}
+      />
     </section>
   );
 }

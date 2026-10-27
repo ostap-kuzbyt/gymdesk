@@ -1,5 +1,6 @@
 import type { SubscriptionView, TariffView } from "@gymdesk/shared";
 import { PlateBadge } from "@/components/plate-badge";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -22,9 +23,11 @@ const STATUS_LABELS: Record<SubscriptionView["status"], string> = {
 export function SubscriptionsTable({
   subscriptions,
   tariffs,
+  onCancel,
 }: {
   subscriptions: SubscriptionView[];
   tariffs: TariffView[];
+  onCancel?: (subscription: SubscriptionView) => void;
 }) {
   const currency = useCurrency();
   const today = todayLocal();
@@ -40,6 +43,7 @@ export function SubscriptionsTable({
           <TableHead>Period</TableHead>
           <TableHead className="text-right">Paid</TableHead>
           <TableHead>Visits</TableHead>
+          {onCancel ? <TableHead className="w-24" /> : null}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -61,6 +65,15 @@ export function SubscriptionsTable({
                 {formatMoney(subscription.priceCents, currency)}
               </TableCell>
               <TableCell>{formatVisits(subscription.visitLimit)}</TableCell>
+              {onCancel ? (
+                <TableCell className="text-right">
+                  {subscription.status === "active" || subscription.status === "upcoming" ? (
+                    <Button variant="ghost" size="sm" onClick={() => onCancel(subscription)}>
+                      Cancel
+                    </Button>
+                  ) : null}
+                </TableCell>
+              ) : null}
             </TableRow>
           );
         })}

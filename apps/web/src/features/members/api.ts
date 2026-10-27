@@ -72,3 +72,25 @@ export function useAssignCoach(memberId: string) {
     onSettled: () => queryClient.invalidateQueries({ queryKey: memberKeys.all }),
   });
 }
+
+export function useSellSubscription(memberId: string) {
+  const api = useApi();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: { tariffId: string; startsOn: string }) =>
+      api.post(memberView, `/api/members/${memberId}/subscriptions`, input),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: memberKeys.all }),
+  });
+}
+
+export function useCancelSubscription(memberId: string) {
+  const api = useApi();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (subscriptionId: string) =>
+      api.post(memberView, `/api/members/${memberId}/subscriptions/${subscriptionId}/cancel`),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: memberKeys.all }),
+  });
+}

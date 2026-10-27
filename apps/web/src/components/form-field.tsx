@@ -5,7 +5,7 @@ interface FieldProps {
   id: string;
   label: string;
   error?: string | undefined;
-  hint?: string;
+  hint?: string | undefined;
   children: ReactNode;
 }
 

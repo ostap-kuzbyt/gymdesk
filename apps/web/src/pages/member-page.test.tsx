@@ -2,169 +2,19 @@ import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { addDays } from "@/lib/dates";
-import { todayLocal } from "@/lib/format";
 import { json, mockApi, problem } from "@/test/mock-api";
 import { renderApp } from "@/test/render-app";
-import type { RenderOptions } from "@/test/render-app";
-
-const today = todayLocal();
-const MEMBER_ID = "6f1d7a52-2f0f-4a43-9a53-5d9b1a9b0001";
-const MONTHLY = "6f1d7a52-2f0f-4a43-9a53-5d9b1a9b0101";
-const QUARTERLY = "6f1d7a52-2f0f-4a43-9a53-5d9b1a9b0102";
-const ACTIVE_SUB = "6f1d7a52-2f0f-4a43-9a53-5d9b1a9b0201";
-const OLD_SUB = "6f1d7a52-2f0f-4a43-9a53-5d9b1a9b0202";
-const IVAN = "6f1d7a52-2f0f-4a43-9a53-5d9b1a9b0301";
-const OLHA = "6f1d7a52-2f0f-4a43-9a53-5d9b1a9b0302";
-
-interface MemberState {
-  id: string;
-  coachId: string | null;
-  fullName: string;
-  birthDate: string;
-  email: string;
-  phone: string | null;
-  age: number;
-  version: number;
-  subscriptions: object[];
-}
-
-function baseMember(overrides: Partial<MemberState> = {}): MemberState {
-  return {
-    id: MEMBER_ID,
-    coachId: null,
-    fullName: "Olena Shevchenko",
-    birthDate: "1994-05-17",
-    email: "olena@example.com",
-    phone: "+380501234567",
-    age: 32,
-    version: 1,
-    subscriptions: [
-      {
-        id: ACTIVE_SUB,
-        tariffId: MONTHLY,
-        startsOn: addDays(today, -10),
-        endsOn: addDays(today, 19),
-        priceCents: 4900,
-        visitLimit: null,
-        cancelledOn: null,
-        status: "active",
-      },
-      {
-        id: OLD_SUB,
-        tariffId: QUARTERLY,
-        startsOn: addDays(today, -130),
-        endsOn: addDays(today, -41),
-        priceCents: 12900,
-        visitLimit: 20,
-        cancelledOn: null,
-        status: "expired",
-      },
-    ],
-    ...overrides,
-  };
-}
-
-const tariffs = [
-  {
-    id: MONTHLY,
-    name: "Monthly",
-    priceCents: 4900,
-    durationDays: 30,
-    visitLimit: null,
-    archived: false,
-    version: 1,
-  },
-  {
-    id: QUARTERLY,
-    name: "Quarterly",
-    priceCents: 12900,
-    durationDays: 90,
-    visitLimit: 20,
-    archived: true,
-    version: 2,
-  },
-];
-const coaches = [
-  {
-    id: IVAN,
-    fullName: "Ivan Petrenko",
-    specialization: "Strength",
-    weeklyHours: [],
-    archived: false,
-    version: 1,
-  },
-  {
-    id: OLHA,
-    fullName: "Olha Koval",
-    specialization: "Yoga",
-    weeklyHours: [],
-    archived: false,
-    version: 1,
-  },
-];
-
-function visit(index: number) {
-  return {
-    id: `6f1d7a52-2f0f-4a43-9a53-5d9b1a9b04${String(index).padStart(2, "0")}`,
-    subscriptionId: ACTIVE_SUB,
-    visitDate: addDays(today, -index),
-    checkedInAt: new Date(2026, 9, 21 - index, 9 + (index % 5), 30).toISOString(),
-  };
-}
-
-function profileApi(
-  state: MemberState,
-  options: { visits?: number; overrides?: Parameters<typeof mockApi>[0] } = {},
-) {
-  const visits = Array.from({ length: options.visits ?? 0 }, (_, index) => visit(index + 1));
-  return mockApi({
-    "GET /api/members/:id": () => json(state),
-    "GET /api/tariffs": () => json(tariffs),
-    "GET /api/coaches": () => json(coaches),
-    "GET /api/members/:id/check-ins": ({ query }) => {
-      const offset = Number(query.get("offset") ?? 0);
-      const limit = Number(query.get("limit") ?? 10);
-      return json({ items: visits.slice(offset, offset + limit), total: visits.length });
-    },
-    "PATCH /api/members/:id": ({ body }) => {
-      Object.assign(state, body, { version: state.version + 1, age: 32 });
-      return json(state);
-    },
-    "PUT /api/members/:id/coach": ({ body }) => {
-      state.coachId = (body as { coachId: string | null }).coachId;
-      state.version += 1;
-      return json(state);
-    },
-    "POST /api/members/:id/check-ins": () =>
-      json(
-        {
-          id: "6f1d7a52-2f0f-4a43-9a53-5d9b1a9b0999",
-          memberId: MEMBER_ID,
-          subscriptionId: ACTIVE_SUB,
-          visitDate: today,
-          checkedInAt: new Date().toISOString(),
-        },
-        201,
-      ),
-    ...options.overrides,
-  });
-}
-
-async function openProfile(
-  api: ReturnType<typeof mockApi>,
-  state: MemberState,
-  options: RenderOptions = {},
-) {
-  const user = userEvent.setup();
-  const view = renderApp({
-    path: `/members/${state.id}`,
-    roles: ["reception"],
-    fetch: api,
-    ...options,
-  });
-  await screen.findByRole("heading", { name: state.fullName });
-  return { user, ...view };
-}
+import {
+  ACTIVE_SUB,
+  IVAN,
+  MEMBER_ID,
+  MONTHLY,
+  OLHA,
+  baseMember,
+  openProfile,
+  profileApi,
+  today,
+} from "@/test/member-fixtures";
 
 describe("profile", () => {
   it("shows contact details and the current subscription", async () => {
