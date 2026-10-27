@@ -6,10 +6,16 @@ const envSchema = z.object({
   VITE_AUTH0_CLIENT_ID: z.string().trim().min(1),
   VITE_AUTH0_AUDIENCE: z.string().trim().min(1),
   VITE_AUTH0_ROLES_CLAIM: z.string().trim().min(1).default("https://gymdesk/roles"),
+  VITE_CURRENCY: z
+    .string()
+    .trim()
+    .regex(/^[A-Za-z]{3}$/, "Must be a three-letter currency code")
+    .default("UAH"),
 });
 
 export interface WebConfig {
   apiUrl: string;
+  currency: string;
   auth0: {
     domain: string;
     clientId: string;
@@ -32,6 +38,7 @@ export function readWebConfig(env: Record<string, unknown>): ConfigResult {
     ok: true,
     config: {
       apiUrl: values.VITE_API_URL.replace(/\/+$/, ""),
+      currency: values.VITE_CURRENCY.toUpperCase(),
       auth0: {
         domain: values.VITE_AUTH0_DOMAIN,
         clientId: values.VITE_AUTH0_CLIENT_ID,

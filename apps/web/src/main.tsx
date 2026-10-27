@@ -5,6 +5,7 @@ import { App } from "./App";
 import { Auth0Session } from "@/auth/auth0-session";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ApiProvider } from "@/lib/api-context";
+import { ConfigProvider } from "@/lib/config-context";
 import { createQueryClient } from "@/lib/query-client";
 import { readWebConfig } from "@/lib/web-config";
 import { SetupNeeded } from "@/screens/setup-needed";
@@ -23,7 +24,9 @@ createRoot(root).render(
         <Auth0Session config={configuration.config}>
           <QueryClientProvider client={queryClient}>
             <ApiProvider baseUrl={configuration.config.apiUrl}>
-              <App />
+              <ConfigProvider config={configuration.config}>
+                <App />
+              </ConfigProvider>
             </ApiProvider>
           </QueryClientProvider>
         </Auth0Session>

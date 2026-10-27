@@ -3,6 +3,7 @@ import type { RouterHistory } from "@tanstack/react-router";
 import { AppLayout } from "@/layout/app-layout";
 import { NotFound } from "@/pages/not-found";
 import { PlaceholderPage } from "@/pages/placeholder-page";
+import { TariffsPage } from "@/pages/tariffs-page";
 
 const rootRoute = createRootRoute({ component: AppLayout, notFoundComponent: NotFound });
 
@@ -26,7 +27,7 @@ const routeTree = rootRoute.addChildren([
   page("schedule", "Schedule"),
   page("reminders", "Reminders"),
   page("reports", "Reports"),
-  page("tariffs", "Tariffs"),
+  createRoute({ getParentRoute: () => rootRoute, path: "tariffs", component: TariffsPage }),
   page("studios", "Studios"),
   page("coaches", "Coaches"),
 ]);

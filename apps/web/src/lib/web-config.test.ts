@@ -13,6 +13,7 @@ describe("readWebConfig", () => {
       ok: true,
       config: {
         apiUrl: "",
+        currency: "UAH",
         auth0: {
           domain: "club.eu.auth0.com",
           clientId: "abc123",
@@ -27,6 +28,19 @@ describe("readWebConfig", () => {
     const result = readWebConfig({ ...complete, VITE_API_URL: "https://api.club.test//" });
 
     expect(result.ok && result.config.apiUrl).toBe("https://api.club.test");
+  });
+
+  it("reads the club currency and upper-cases it", () => {
+    const result = readWebConfig({ ...complete, VITE_CURRENCY: "eur" });
+
+    expect(result.ok && result.config.currency).toBe("EUR");
+  });
+
+  it("rejects a currency that is not a three-letter code", () => {
+    expect(readWebConfig({ ...complete, VITE_CURRENCY: "euros" })).toEqual({
+      ok: false,
+      missing: ["VITE_CURRENCY"],
+    });
   });
 
   it("lists every missing variable once", () => {

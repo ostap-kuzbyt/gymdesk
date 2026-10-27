@@ -1,12 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { canCheckIn } from "./permissions";
+import { canCheckIn, isAdmin, isFrontDesk } from "./permissions";
 
-describe("canCheckIn", () => {
-  it("allows the admin and the front desk but not coaches", () => {
-    expect(canCheckIn(["admin"])).toBe(true);
+describe("permissions", () => {
+  it("gives the front desk to the admin and reception but not coaches", () => {
+    expect(isFrontDesk(["admin"])).toBe(true);
+    expect(isFrontDesk(["reception"])).toBe(true);
+    expect(isFrontDesk(["coach", "reception"])).toBe(true);
+    expect(isFrontDesk(["coach"])).toBe(false);
+    expect(isFrontDesk([])).toBe(false);
+  });
+
+  it("lets only the admin manage the catalogue", () => {
+    expect(isAdmin(["admin"])).toBe(true);
+    expect(isAdmin(["reception", "coach"])).toBe(false);
+  });
+
+  it("checks people in at the front desk", () => {
     expect(canCheckIn(["reception"])).toBe(true);
-    expect(canCheckIn(["coach", "reception"])).toBe(true);
     expect(canCheckIn(["coach"])).toBe(false);
-    expect(canCheckIn([])).toBe(false);
   });
 });
