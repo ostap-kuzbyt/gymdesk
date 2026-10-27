@@ -2,15 +2,13 @@ import { checkInView } from "@gymdesk/shared";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useApi } from "@/lib/api-context";
+import { memberKeys } from "./members/api";
 import { ApiError } from "@/lib/api";
+import { formatTime } from "@/lib/format";
 
 interface CheckInTarget {
   id: string;
   name: string;
-}
-
-function timeOf(isoInstant: string): string {
-  return new Date(isoInstant).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
 export function useCheckIn() {
@@ -22,10 +20,10 @@ export function useCheckIn() {
       api.post(checkInView, `/api/members/${target.id}/check-ins`),
     onSuccess: (visit, target) => {
       toast.success(`${target.name} checked in`, {
-        description: `Arrived at ${timeOf(visit.checkedInAt)}`,
+        description: `Arrived at ${formatTime(visit.checkedInAt)}`,
       });
       void queryClient.invalidateQueries({ queryKey: ["check-ins"] });
-      void queryClient.invalidateQueries({ queryKey: ["members", target.id] });
+      void queryClient.invalidateQueries({ queryKey: memberKeys.detail(target.id) });
     },
     onError: (error, target) => {
       toast.error(`${target.name} was not checked in`, {

@@ -1,5 +1,5 @@
-import { memberPage, memberView } from "@gymdesk/shared";
-import type { NewMemberInput } from "@gymdesk/shared";
+import { memberPage, memberView, visitPage } from "@gymdesk/shared";
+import type { MemberView, NewMemberInput } from "@gymdesk/shared";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api-context";
 
@@ -7,6 +7,7 @@ export const memberKeys = {
   all: ["members"] as const,
   list: (q: string, offset: number, limit: number) =>
     ["members", "list", { q, offset, limit }] as const,
+  detail: (id: string) => ["members", "detail", id] as const,
 };
 
 export function useMemberSearch(options: { q: string; offset: number; limit: number }) {
@@ -30,5 +31,44 @@ export function useRegisterMember() {
   return useMutation({
     mutationFn: (input: NewMemberInput) => api.post(memberView, "/api/members", input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: memberKeys.all }),
+  });
+}
+
+export function useMember(id: string) {
+  const api = useApi();
+  return useQuery({
+    queryKey: memberKeys.detail(id),
+    queryFn: () => api.get(memberView, `/api/members/${id}`),
+  });
+}
+
+export function useVisits(id: string, offset: number, limit: number) {
+  const api = useApi();
+  return useQuery({
+    queryKey: ["check-ins", id, { offset, limit }],
+    queryFn: () => api.get(visitPage, `/api/members/${id}/check-ins`, { limit, offset }),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useUpdateMember(member: MemberView) {
+  const api = useApi();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (changes: Record<string, unknown>) =>
+      api.patch(memberView, `/api/members/${member.id}`, { ...changes, version: member.version }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: memberKeys.all }),
+  });
+}
+
+export function useAssignCoach(memberId: string) {
+  const api = useApi();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (coachId: string | null) =>
+      api.put(memberView, `/api/members/${memberId}/coach`, { coachId }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: memberKeys.all }),
   });
 }

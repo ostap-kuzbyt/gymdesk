@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { formatDate, formatMoney, formatTerm, formatVisits, todayLocal } from "./format";
+import {
+  formatDate,
+  formatMoney,
+  formatPeriod,
+  formatTerm,
+  formatTime,
+  formatVisits,
+  todayLocal,
+} from "./format";
 
 describe("formatMoney", () => {
   it("turns cents into a currency amount", () => {
@@ -34,5 +42,19 @@ describe("todayLocal", () => {
   it("formats the local calendar day as yyyy-mm-dd", () => {
     expect(todayLocal(new Date(2026, 9, 21, 23, 30))).toBe("2026-10-21");
     expect(todayLocal(new Date(2026, 2, 4, 0, 5))).toBe("2026-03-04");
+  });
+});
+
+describe("formatPeriod", () => {
+  it("joins the first and last day", () => {
+    expect(formatPeriod("2026-10-21", "2026-11-19")).toBe("21 Oct 2026 – 19 Nov 2026");
+  });
+});
+
+describe("formatTime", () => {
+  it("shows hours and minutes with a leading zero", () => {
+    const instant = new Date(2026, 9, 21, 9, 5).toISOString();
+
+    expect(formatTime(instant)).toBe("09:05");
   });
 });

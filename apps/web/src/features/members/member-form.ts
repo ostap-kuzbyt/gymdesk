@@ -49,3 +49,12 @@ export const emptyMemberForm: MemberFormValues = {
   email: "",
   phone: "",
 };
+
+export function toMemberChanges(values: MemberFormValues) {
+  return {
+    fullName: values.fullName.trim(),
+    birthDate: values.birthDate,
+    email: values.email.trim(),
+    phone: values.phone === "" ? null : values.phone,
+  };
+}

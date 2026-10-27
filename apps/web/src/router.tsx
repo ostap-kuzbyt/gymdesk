@@ -2,6 +2,7 @@ import { createRootRoute, createRoute, createRouter } from "@tanstack/react-rout
 import type { RouterHistory } from "@tanstack/react-router";
 import { AppLayout } from "@/layout/app-layout";
 import { NotFound } from "@/pages/not-found";
+import { MemberPage } from "@/pages/member-page";
 import { MembersPage } from "@/pages/members-page";
 import { PlaceholderPage } from "@/pages/placeholder-page";
 import { StudiosPage } from "@/pages/studios-page";
@@ -19,7 +20,7 @@ const page = (path: string, title: string) =>
 const memberRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "members/$memberId",
-  component: () => <PlaceholderPage title="Member" />,
+  component: MemberPage,
 });
 
 const routeTree = rootRoute.addChildren([

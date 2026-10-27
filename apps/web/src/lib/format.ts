@@ -29,3 +29,11 @@ export function todayLocal(now: Date = new Date()): string {
     day: "2-digit",
   }).format(now);
 }
+
+export function formatTime(isoInstant: string): string {
+  return new Date(isoInstant).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+}
+
+export function formatPeriod(startsOn: string, endsOn: string): string {
+  return `${formatDate(startsOn)} – ${formatDate(endsOn)}`;
+}

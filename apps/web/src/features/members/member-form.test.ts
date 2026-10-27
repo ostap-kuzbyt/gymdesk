@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { addDays } from "@/lib/dates";
 import { todayLocal } from "@/lib/format";
-import { emptyMemberForm, formValuesOf, memberFormSchema, toNewMember } from "./member-form";
+import {
+  emptyMemberForm,
+  formValuesOf,
+  memberFormSchema,
+  toMemberChanges,
+  toNewMember,
+} from "./member-form";
 
 const valid = {
   fullName: "Olena Shevchenko",
@@ -63,5 +69,17 @@ describe("formValuesOf", () => {
       }),
     ).toEqual(valid);
     expect(emptyMemberForm.phone).toBe("");
+  });
+});
+
+describe("toMemberChanges", () => {
+  it("clears the phone with null when the field is emptied", () => {
+    expect(toMemberChanges({ ...valid, phone: "" })).toEqual({
+      fullName: "Olena Shevchenko",
+      birthDate: "1994-05-17",
+      email: "olena@example.com",
+      phone: null,
+    });
+    expect(toMemberChanges({ ...valid, phone: "+380501234567" }).phone).toBe("+380501234567");
   });
 });
