@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { TariffView } from "@gymdesk/shared";
 import { useForm } from "react-hook-form";
+import type { Path } from "react-hook-form";
 import { toast } from "sonner";
 import { Field } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { fieldErrorsOf, messageOf } from "@/lib/errors";
+import { applyApiError } from "@/lib/form-errors";
 import { useSaveTariff } from "./api";
 import { emptyTariffForm, formValuesOf, tariffFormSchema, toTariffInput } from "./tariff-form";
 import type { TariffFormValues } from "./tariff-form";
@@ -25,7 +26,7 @@ interface TariffDialogProps {
   tariff?: TariffView | undefined;
 }
 
-const API_FIELD_TO_FORM: Record<string, keyof TariffFormValues> = {
+const API_FIELD_TO_FORM: Record<string, Path<TariffFormValues>> = {
   name: "name",
   priceCents: "price",
   durationDays: "durationDays",
@@ -62,14 +63,12 @@ function TariffForm({ tariff, close }: { tariff: TariffView | undefined; close: 
         toast.success(tariff ? `${saved.name} updated` : `${saved.name} created`);
         close();
       },
-      onError: (error) => {
-        const fieldErrors = fieldErrorsOf(error);
-        const mapped = Object.entries(fieldErrors).filter(([path]) => path in API_FIELD_TO_FORM);
-        for (const [path, message] of mapped) {
-          setError(API_FIELD_TO_FORM[path] as keyof TariffFormValues, { message });
-        }
-        if (mapped.length === 0) setFormError(messageOf(error));
-      },
+      onError: (error) =>
+        applyApiError<TariffFormValues>(error, {
+          setError,
+          fields: API_FIELD_TO_FORM,
+          onForm: setFormError,
+        }),
     });
   });
 
