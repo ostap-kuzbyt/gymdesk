@@ -1,3 +1,4 @@
+import { id, isCalendarDate } from "@gymdesk/shared";
 import { createRootRoute, createRoute, createRouter } from "@tanstack/react-router";
 import type { RouterHistory } from "@tanstack/react-router";
 import { AppLayout } from "@/layout/app-layout";
@@ -6,7 +7,9 @@ import { CoachPage } from "@/pages/coach-page";
 import { CoachesPage } from "@/pages/coaches-page";
 import { MemberPage } from "@/pages/member-page";
 import { MembersPage } from "@/pages/members-page";
+import { mondayOf } from "@/lib/week";
 import { PlaceholderPage } from "@/pages/placeholder-page";
+import { SchedulePage } from "@/pages/schedule-page";
 import { StudiosPage } from "@/pages/studios-page";
 import { TariffsPage } from "@/pages/tariffs-page";
 
@@ -42,7 +45,27 @@ const routeTree = rootRoute.addChildren([
     },
   }),
   memberRoute,
-  page("schedule", "Schedule"),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "schedule",
+    component: SchedulePage,
+    validateSearch: (
+      search: Record<string, unknown>,
+    ): { week?: string | undefined; studio?: string | undefined; coach?: string | undefined } => {
+      const week =
+        typeof search.week === "string" && isCalendarDate(search.week)
+          ? mondayOf(search.week)
+          : undefined;
+      const uuid = (value: unknown) =>
+        typeof value === "string" && id.safeParse(value).success ? value : undefined;
+      return { week, studio: uuid(search.studio), coach: uuid(search.coach) };
+    },
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "workouts/$workoutId",
+    component: () => <PlaceholderPage title="Workout" />,
+  }),
   page("reminders", "Reminders"),
   page("reports", "Reports"),
   createRoute({ getParentRoute: () => rootRoute, path: "tariffs", component: TariffsPage }),
