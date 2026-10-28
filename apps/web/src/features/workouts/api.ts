@@ -1,4 +1,5 @@
 import { workoutListItem, workoutView } from "@gymdesk/shared";
+import type { NewWorkoutInput } from "@gymdesk/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { useApi } from "@/lib/api-context";
@@ -63,5 +64,15 @@ export function useCancelWorkout(workoutId: string) {
   return useMutation({
     mutationFn: () => api.post(workoutView, `/api/workouts/${workoutId}/cancel`),
     onSettled: () => queryClient.invalidateQueries({ queryKey: workoutKeys.all }),
+  });
+}
+
+export function useScheduleWorkout() {
+  const api = useApi();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: NewWorkoutInput) => api.post(workoutView, "/api/workouts", input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: workoutKeys.all }),
   });
 }

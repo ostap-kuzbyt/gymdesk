@@ -1,6 +1,8 @@
 import type { WorkoutListItem } from "@gymdesk/shared";
 import { getRouteApi, Link, useNavigate } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState } from "react";
+import { useSession } from "@/auth/session";
 import { PageHeader } from "@/components/page-header";
 import { ErrorNotice, TableSkeleton } from "@/components/query-states";
 import { Button } from "@/components/ui/button";
@@ -9,6 +11,8 @@ import { useCoaches } from "@/features/coaches/api";
 import { fillOf } from "@/features/workouts/capacity";
 import { useStudios } from "@/features/studios/api";
 import { useWorkouts } from "@/features/workouts/api";
+import { WorkoutDialog } from "@/features/workouts/workout-dialog";
+import { isFrontDesk } from "@/lib/permissions";
 import { addDays } from "@/lib/dates";
 import { formatDate, todayLocal } from "@/lib/format";
 import { WEEKDAY_SHORT } from "@/lib/hours";
@@ -26,6 +30,8 @@ const FILL_BAR = {
 } as const;
 
 export function SchedulePage() {
+  const { roles } = useSession();
+  const [creating, setCreating] = useState(false);
   const search = scheduleRoute.useSearch();
   const navigate = useNavigate();
   const today = todayLocal();
@@ -72,27 +78,32 @@ export function SchedulePage() {
         title="Schedule"
         description={`${formatDate(monday)} – ${formatDate(addDays(monday, 6))}`}
         actions={
-          <div className="flex items-center gap-2" role="group" aria-label="Week">
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Previous week"
-              onClick={() => go({ ...search, week: addDays(monday, -7) })}
-            >
-              <ChevronLeft />
-            </Button>
-            <Button variant="outline" onClick={() => go({ ...search, week: undefined })}>
-              This week
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Next week"
-              onClick={() => go({ ...search, week: addDays(monday, 7) })}
-            >
-              <ChevronRight />
-            </Button>
-          </div>
+          <>
+            {isFrontDesk(roles) ? (
+              <Button onClick={() => setCreating(true)}>New workout</Button>
+            ) : null}
+            <div className="flex items-center gap-2" role="group" aria-label="Week">
+              <Button
+                variant="outline"
+                size="icon"
+                aria-label="Previous week"
+                onClick={() => go({ ...search, week: addDays(monday, -7) })}
+              >
+                <ChevronLeft />
+              </Button>
+              <Button variant="outline" onClick={() => go({ ...search, week: undefined })}>
+                This week
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                aria-label="Next week"
+                onClick={() => go({ ...search, week: addDays(monday, 7) })}
+              >
+                <ChevronRight />
+              </Button>
+            </div>
+          </>
         }
       />
 
@@ -208,6 +219,7 @@ export function SchedulePage() {
           </ol>
         </>
       ) : null}
+      <WorkoutDialog open={creating} onOpenChange={setCreating} />
     </section>
   );
 }
