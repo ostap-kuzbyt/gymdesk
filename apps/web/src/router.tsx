@@ -2,6 +2,8 @@ import { createRootRoute, createRoute, createRouter } from "@tanstack/react-rout
 import type { RouterHistory } from "@tanstack/react-router";
 import { AppLayout } from "@/layout/app-layout";
 import { NotFound } from "@/pages/not-found";
+import { CoachPage } from "@/pages/coach-page";
+import { CoachesPage } from "@/pages/coaches-page";
 import { MemberPage } from "@/pages/member-page";
 import { MembersPage } from "@/pages/members-page";
 import { PlaceholderPage } from "@/pages/placeholder-page";
@@ -45,7 +47,8 @@ const routeTree = rootRoute.addChildren([
   page("reports", "Reports"),
   createRoute({ getParentRoute: () => rootRoute, path: "tariffs", component: TariffsPage }),
   createRoute({ getParentRoute: () => rootRoute, path: "studios", component: StudiosPage }),
-  page("coaches", "Coaches"),
+  createRoute({ getParentRoute: () => rootRoute, path: "coaches", component: CoachesPage }),
+  createRoute({ getParentRoute: () => rootRoute, path: "coaches/$coachId", component: CoachPage }),
 ]);
 
 export function createAppRouter(history?: RouterHistory) {
