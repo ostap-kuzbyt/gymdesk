@@ -10,6 +10,7 @@ import { MembersPage } from "@/pages/members-page";
 import { mondayOf } from "@/lib/week";
 import { PlaceholderPage } from "@/pages/placeholder-page";
 import { SchedulePage } from "@/pages/schedule-page";
+import { WorkoutPage } from "@/pages/workout-page";
 import { StudiosPage } from "@/pages/studios-page";
 import { TariffsPage } from "@/pages/tariffs-page";
 
@@ -64,7 +65,7 @@ const routeTree = rootRoute.addChildren([
   createRoute({
     getParentRoute: () => rootRoute,
     path: "workouts/$workoutId",
-    component: () => <PlaceholderPage title="Workout" />,
+    component: WorkoutPage,
   }),
   page("reminders", "Reminders"),
   page("reports", "Reports"),

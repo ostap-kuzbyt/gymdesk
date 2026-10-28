@@ -21,7 +21,7 @@ export function EmptyState({
   action,
 }: {
   title: string;
-  hint?: string;
+  hint?: string | undefined;
   action?: ReactNode;
 }) {
   return (
