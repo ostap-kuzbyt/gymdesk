@@ -8,6 +8,7 @@ describe("navFor", () => {
   it("shows everything to an admin", () => {
     expect(labels(["admin"])).toEqual([
       "Today",
+      "Check-in",
       "Members",
       "Schedule",
       "Reminders",
@@ -22,7 +23,7 @@ describe("navFor", () => {
     expect(labels(["reception"])).toEqual(labels(["admin"]));
   });
 
-  it("hides reminders and reports from coaches", () => {
+  it("hides check-in, reminders and reports from coaches", () => {
     expect(labels(["coach"])).toEqual([
       "Today",
       "Members",
@@ -36,6 +37,7 @@ describe("navFor", () => {
   it("splits the pages into the main tabs and the club menu", () => {
     expect(labels(["admin"], "main")).toEqual([
       "Today",
+      "Check-in",
       "Members",
       "Schedule",
       "Reminders",
@@ -45,7 +47,7 @@ describe("navFor", () => {
   });
 
   it("combines the pages of several roles and shows nothing without a role", () => {
-    expect(labels(["coach", "reception"])).toHaveLength(8);
+    expect(labels(["coach", "reception"])).toHaveLength(9);
     expect(labels([])).toEqual([]);
   });
 });
@@ -61,6 +63,8 @@ describe("canOpen", () => {
   it("refuses a section the role cannot see", () => {
     expect(canOpen(["coach"], "/reports")).toBe(false);
     expect(canOpen(["coach"], "/reminders")).toBe(false);
+    expect(canOpen(["coach"], "/check-in")).toBe(false);
+    expect(canOpen(["reception"], "/check-in")).toBe(true);
   });
 
   it("refuses everything without a role and lets unknown pages through for staff", () => {

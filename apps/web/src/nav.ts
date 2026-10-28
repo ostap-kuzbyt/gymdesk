@@ -15,6 +15,7 @@ const FRONT_DESK: readonly Role[] = ["admin", "reception"];
 
 export const NAV_ITEMS: readonly NavItem[] = [
   { id: "today", label: "Today", to: "/", group: "main", roles: EVERYONE },
+  { id: "check-in", label: "Check-in", to: "/check-in", group: "main", roles: FRONT_DESK },
   { id: "members", label: "Members", to: "/members", group: "main", roles: EVERYONE },
   { id: "schedule", label: "Schedule", to: "/schedule", group: "main", roles: EVERYONE },
   { id: "reminders", label: "Reminders", to: "/reminders", group: "main", roles: FRONT_DESK },

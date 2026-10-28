@@ -23,6 +23,7 @@ export function useCheckIn() {
         description: `Arrived at ${formatTime(visit.checkedInAt)}`,
       });
       void queryClient.invalidateQueries({ queryKey: ["check-ins"] });
+      void queryClient.invalidateQueries({ queryKey: ["reports"] });
       void queryClient.invalidateQueries({ queryKey: memberKeys.detail(target.id) });
     },
     onError: (error, target) => {

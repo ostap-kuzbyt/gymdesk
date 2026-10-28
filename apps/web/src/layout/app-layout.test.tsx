@@ -13,7 +13,7 @@ describe("top bar", () => {
     const tabs = within(pagesNav())
       .getAllByRole("link")
       .map((link) => link.textContent);
-    expect(tabs).toEqual(["Today", "Members", "Schedule", "Reminders", "Reports"]);
+    expect(tabs).toEqual(["Today", "Check-in", "Members", "Schedule", "Reminders", "Reports"]);
     expect(within(pagesNav()).getByRole("button", { name: "Club" })).toBeInTheDocument();
   });
 
