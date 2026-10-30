@@ -105,7 +105,7 @@ function MemberProfile({ member }: { member: MemberView }) {
           }
         />
 
-        <div className="flex flex-wrap items-center gap-x-10 gap-y-5">
+        <div className="flex flex-wrap items-center gap-x-10 gap-y-5 rounded-md border border-border bg-card p-5">
           <div className="flex items-center gap-3">
             {plate ? <PlateBadge {...plate} size="lg" /> : null}
             <div>

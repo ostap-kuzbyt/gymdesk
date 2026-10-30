@@ -116,13 +116,13 @@ export function TariffsPage() {
                     {tariff.archived ? null : (
                       <>
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
                           onClick={() => setDialog({ open: true, tariff })}
                         >
                           Edit
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => setToArchive(tariff)}>
+                        <Button variant="outline" size="sm" onClick={() => setToArchive(tariff)}>
                           Archive
                         </Button>
                       </>

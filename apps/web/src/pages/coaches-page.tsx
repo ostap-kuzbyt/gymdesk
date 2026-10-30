@@ -124,13 +124,13 @@ export function CoachesPage() {
                       {coach.archived ? null : (
                         <>
                           <Button
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
                             onClick={() => setDialog({ open: true, coach })}
                           >
                             Edit
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => setToArchive(coach)}>
+                          <Button variant="outline" size="sm" onClick={() => setToArchive(coach)}>
                             Archive
                           </Button>
                         </>

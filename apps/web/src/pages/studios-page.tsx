@@ -102,13 +102,13 @@ export function StudiosPage() {
                     {studio.archived ? null : (
                       <>
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
                           onClick={() => setDialog({ open: true, studio })}
                         >
                           Edit
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => setToArchive(studio)}>
+                        <Button variant="outline" size="sm" onClick={() => setToArchive(studio)}>
                           Archive
                         </Button>
                       </>

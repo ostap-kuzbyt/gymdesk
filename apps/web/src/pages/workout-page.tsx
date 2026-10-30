@@ -193,7 +193,7 @@ function WorkoutDetails({ workout }: { workout: WorkoutView }) {
                   {frontDesk && open ? (
                     <TableCell className="text-right">
                       {reservation.cancelledAt ? null : (
-                        <Button variant="ghost" size="sm" onClick={() => setToDrop(reservation)}>
+                        <Button variant="outline" size="sm" onClick={() => setToDrop(reservation)}>
                           Cancel booking
                         </Button>
                       )}

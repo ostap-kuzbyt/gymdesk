@@ -104,7 +104,7 @@ export function CheckInDeskPage() {
                 }
               />
             ) : (
-              <ul className="flex flex-col divide-y divide-border">
+              <ul className="flex flex-col divide-y divide-border rounded-md border border-border bg-card px-4">
                 {found.map((member) => (
                   <li key={member.id} className="flex items-center justify-between gap-4 py-3">
                     <div className="min-w-0">
@@ -150,41 +150,46 @@ export function CheckInDeskPage() {
           </div>
         </div>
 
-        <aside aria-label="Arrived today">
-          <h2 className="mb-3">Arrived today</h2>
-          {arrivals.isPending ? <TableSkeleton columns={1} rows={4} /> : null}
-          {arrivals.isError ? (
-            <ErrorNotice error={arrivals.error} onRetry={() => void arrivals.refetch()} />
-          ) : null}
-          {arrivals.data && arrived.length === 0 ? (
-            <p className="text-muted-foreground">Nobody has checked in yet today.</p>
-          ) : null}
-          {arrived.length > 0 ? (
-            <>
-              <p className="mb-2 text-sm text-muted-foreground">
-                {arrived.length === 1 ? "1 member" : `${arrived.length} members`}
-              </p>
-              <ul className="flex flex-col divide-y divide-border">
-                {arrived.map((item) => (
-                  <li
-                    key={item.memberId}
-                    className="flex items-baseline justify-between gap-3 py-2"
-                  >
-                    <Link
-                      to="/members/$memberId"
-                      params={{ memberId: item.memberId }}
-                      className="truncate hover:text-primary hover:underline"
+        <aside
+          aria-label="Arrived today"
+          className="self-start rounded-md border border-border bg-card"
+        >
+          <h2 className="border-b border-border px-4 py-3">Arrived today</h2>
+          <div className="px-4 py-2">
+            {arrivals.isPending ? <TableSkeleton columns={1} rows={4} /> : null}
+            {arrivals.isError ? (
+              <ErrorNotice error={arrivals.error} onRetry={() => void arrivals.refetch()} />
+            ) : null}
+            {arrivals.data && arrived.length === 0 ? (
+              <p className="text-muted-foreground">Nobody has checked in yet today.</p>
+            ) : null}
+            {arrived.length > 0 ? (
+              <>
+                <p className="mb-2 text-sm text-muted-foreground">
+                  {arrived.length === 1 ? "1 member" : `${arrived.length} members`}
+                </p>
+                <ul className="flex flex-col divide-y divide-border">
+                  {arrived.map((item) => (
+                    <li
+                      key={item.memberId}
+                      className="flex items-baseline justify-between gap-3 py-2"
                     >
-                      {item.fullName}
-                    </Link>
-                    <span className="text-sm text-muted-foreground tabular-nums">
-                      {arrivedAt[item.memberId] ?? ""}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </>
-          ) : null}
+                      <Link
+                        to="/members/$memberId"
+                        params={{ memberId: item.memberId }}
+                        className="truncate hover:text-primary hover:underline"
+                      >
+                        {item.fullName}
+                      </Link>
+                      <span className="text-sm text-muted-foreground tabular-nums">
+                        {arrivedAt[item.memberId] ?? ""}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : null}
+          </div>
         </aside>
       </div>
     </section>

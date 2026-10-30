@@ -79,7 +79,7 @@ export function SubscriptionsTable({
               {onCancel ? (
                 <TableCell className="text-right">
                   {subscription.status === "active" || subscription.status === "upcoming" ? (
-                    <Button variant="ghost" size="sm" onClick={() => onCancel(subscription)}>
+                    <Button variant="outline" size="sm" onClick={() => onCancel(subscription)}>
                       Cancel
                     </Button>
                   ) : null}
