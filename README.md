@@ -65,19 +65,20 @@ API tests start PostgreSQL through Testcontainers, so Docker has to be running.
 
 API (`.env` at the repo root, read by `npm run dev` and `npm start`):
 
-| Variable                         | Default       | Notes                                                     |
-| -------------------------------- | ------------- | --------------------------------------------------------- |
-| `DATABASE_URL`                   |               | PostgreSQL connection string                              |
-| `AUTH0_DOMAIN`, `AUTH0_AUDIENCE` |               | Tokens are verified against the tenant's JWKS             |
-| `AUTH0_ROLES_CLAIM`              |               | Name of the claim that carries the user's roles           |
-| `CLUB_TIMEZONE`                  | `Europe/Kyiv` | All "today" calculations and schedules use this zone      |
-| `CLUB_NAME`                      | `Gymdesk`     | Shown in reminder emails                                  |
-| `REMINDER_DAYS_BEFORE`           | `7`           | How early the expiry reminder is sent                     |
-| `PROMO_DISCOUNT_PERCENT`         | `10`          | Discount in the promotion email                           |
-| `RUN_JOBS`                       | `true`        | Set to `false` to disable the daily scan on this instance |
-| `EXPIRY_SCAN_CRON`               | `0 8 * * *`   | When the scan runs, in the club time zone                 |
-| `MIGRATE_ON_START`               | `false`       | Always `true` in compose                                  |
-| `SENDGRID_API_KEY`, `MAIL_FROM`  |               | Without a key emails are only written to the log          |
+| Variable                         | Default       | Notes                                                                                                |
+| -------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                   |               | PostgreSQL connection string                                                                         |
+| `AUTH0_DOMAIN`, `AUTH0_AUDIENCE` |               | Tokens are verified against the tenant's JWKS                                                        |
+| `AUTH0_ROLES_CLAIM`              |               | Name of the claim that carries the user's roles                                                      |
+| `CLUB_TIMEZONE`                  | `Europe/Kyiv` | All "today" calculations and schedules use this zone                                                 |
+| `CLUB_NAME`                      | `Gymdesk`     | Shown in reminder emails                                                                             |
+| `REMINDER_DAYS_BEFORE`           | `7`           | How early the expiry reminder is sent                                                                |
+| `PROMO_DISCOUNT_PERCENT`         | `10`          | Discount in the promotion email                                                                      |
+| `RUN_JOBS`                       | `true`        | Set to `false` to disable the daily scan on this instance                                            |
+| `EXPIRY_SCAN_CRON`               | `0 8 * * *`   | When the scan runs, in the club time zone                                                            |
+| `MIGRATE_ON_START`               | `false`       | Always `true` in compose                                                                             |
+| `SENDGRID_API_KEY`, `MAIL_FROM`  |               | Without a key emails are only written to the log                                                     |
+| `CORS_ORIGIN`                    |               | Web origins allowed to call the api from another host, comma-separated. Empty means same origin only |
 
 Web (`VITE_*`, build time):
 
@@ -89,6 +90,31 @@ Web (`VITE_*`, build time):
 | `VITE_CURRENCY`                                 | Three-letter ISO code used to format prices. Default `UAH`      |
 
 If a required `VITE_*` value is missing, the app shows which one instead of a blank page.
+
+## Deploy for free
+
+The web app is static, the api is a Docker service and the database is PostgreSQL, so three free services cover it: Neon for the database, Render for the api and Vercel for the web app. Free plans and limits change, so check each provider's page.
+
+1. **Database (Neon).** Create a project and copy the connection string with _Pooled connection_ switched off. It looks like `postgresql://user:password@ep-name.region.aws.neon.tech/neondb?sslmode=require`. The job queue needs a direct connection.
+2. **API (Render).** _New → Blueprint_, pick this repository and Render reads `render.yaml`. It asks for `DATABASE_URL` (the string from step 1), `AUTH0_DOMAIN` and `CORS_ORIGIN`. Enter a placeholder for `CORS_ORIGIN` for now. When the deploy is live, `https://gymdesk-api.onrender.com/health` answers `ok` (the name in your URL may differ). Migrations run on start.
+3. **Web (Vercel).** _Add New → Project_, import the repository and keep the defaults, `vercel.json` sets the build. Add these environment variables and deploy:
+
+   | Variable                                                         | Value                                          |
+   | ---------------------------------------------------------------- | ---------------------------------------------- |
+   | `VITE_API_URL`                                                   | the api address from step 2, no trailing slash |
+   | `VITE_AUTH0_DOMAIN`, `VITE_AUTH0_CLIENT_ID`                      | as in your `.env`                              |
+   | `VITE_AUTH0_AUDIENCE`, `VITE_AUTH0_ROLES_CLAIM`, `VITE_CURRENCY` | as in your `.env`                              |
+
+4. **Allow the web app to call the api.** In Render set `CORS_ORIGIN` to the Vercel address, for example `https://gymdesk.vercel.app`, without a trailing slash. The api restarts by itself.
+5. **Auth0.** Add the Vercel address to _Allowed Callback URLs_, _Allowed Logout URLs_ and _Allowed Web Origins_ of the application, next to the local ones.
+6. **Demo data.** From your machine, run the seed against the hosted database:
+
+   ```sh
+   DATABASE_URL='postgresql://…' npm run db:seed -w @gymdesk/api
+   ```
+
+7. **Keep the api awake.** A free Render service sleeps after 15 minutes without requests and takes about a minute to wake up. The nightly reminder scan runs inside the api, so it only runs while the service is awake. A free uptime monitor such as cron-job.org that requests `/health` every 10 minutes avoids both.
+8. **Your own domain.** In Vercel open _Settings → Domains_ and add it, then add the same address to Auth0 and to `CORS_ORIGIN`. Without one the app lives on a `*.vercel.app` address.
 
 ## Auth0 setup
 

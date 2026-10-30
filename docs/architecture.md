@@ -24,6 +24,7 @@ flowchart LR
 ```
 
 - The browser only ever talks to the `web` origin, so the API needs no CORS configuration in compose. In development Vite plays the same proxy role.
+- When the web app is hosted apart from the api, as on Vercel and Render, the browser calls the api directly and `CORS_ORIGIN` lists the web origin that may do so. It is empty by default.
 - pg-boss keeps its queue in the same database, so there is no Redis or other broker to run. The daily scan is scheduled by the API process itself (`RUN_JOBS`).
 - Without `SENDGRID_API_KEY` the mailer only logs messages. That is the default for local work and tests.
 
