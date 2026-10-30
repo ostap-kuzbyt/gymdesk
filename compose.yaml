@@ -15,5 +15,61 @@ services:
       timeout: 3s
       retries: 10
 
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://gymdesk:gymdesk@db:5432/gymdesk
+      MIGRATE_ON_START: "true"
+      PORT: "3000"
+      CLUB_TIMEZONE: ${CLUB_TIMEZONE:-Europe/Kyiv}
+      CLUB_NAME: ${CLUB_NAME:-Gymdesk}
+      AUTH0_DOMAIN: ${AUTH0_DOMAIN:-}
+      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE:-}
+      AUTH0_ROLES_CLAIM: ${AUTH0_ROLES_CLAIM:-https://gymdesk/roles}
+      REMINDER_DAYS_BEFORE: ${REMINDER_DAYS_BEFORE:-7}
+      PROMO_DISCOUNT_PERCENT: ${PROMO_DISCOUNT_PERCENT:-10}
+      RUN_JOBS: ${RUN_JOBS:-true}
+      EXPIRY_SCAN_CRON: ${EXPIRY_SCAN_CRON:-0 8 * * *}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
+      MAIL_FROM: ${MAIL_FROM:-}
+    ports:
+      - "${API_PORT:-3000}:3000"
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-}
+        VITE_AUTH0_DOMAIN: ${VITE_AUTH0_DOMAIN:-}
+        VITE_AUTH0_CLIENT_ID: ${VITE_AUTH0_CLIENT_ID:-}
+        VITE_AUTH0_AUDIENCE: ${VITE_AUTH0_AUDIENCE:-}
+        VITE_AUTH0_ROLES_CLAIM: ${VITE_AUTH0_ROLES_CLAIM:-https://gymdesk/roles}
+        VITE_CURRENCY: ${VITE_CURRENCY:-UAH}
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${WEB_PORT:-8080}:8080"
+
+  seed:
+    profiles: ["seed"]
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: build
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://gymdesk:gymdesk@db:5432/gymdesk
+      CLUB_TIMEZONE: ${CLUB_TIMEZONE:-Europe/Kyiv}
+    command: ["npm", "run", "db:seed", "-w", "@gymdesk/api", "--", "--reset"]
+
 volumes:
   db-data:
