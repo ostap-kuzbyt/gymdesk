@@ -10,11 +10,14 @@ import type { FastifyPluginAsync } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import type { RoleGuard } from "../../platform/auth.js";
+import { assertOwnedBy } from "../../platform/scope.js";
+import type { ScopeResolver } from "../../platform/scope.js";
 import type { WorkoutService } from "./workout.service.js";
 
 export interface WorkoutRoutesOptions {
   service: WorkoutService;
   requireRole: RoleGuard;
+  scopeOf: ScopeResolver;
 }
 
 const idParams = z.object({ id });
@@ -22,7 +25,7 @@ const reservationParams = z.object({ id, reservationId: id });
 
 export const workoutRoutes: FastifyPluginAsync<WorkoutRoutesOptions> = async (
   app,
-  { service, requireRole },
+  { service, requireRole, scopeOf },
 ) => {
   const api = app.withTypeProvider<ZodTypeProvider>();
   const anyStaff = requireRole("admin", "reception", "coach");
@@ -34,13 +37,22 @@ export const workoutRoutes: FastifyPluginAsync<WorkoutRoutesOptions> = async (
       preHandler: anyStaff,
       schema: { querystring: workoutQuery, response: { 200: z.array(workoutListItem) } },
     },
-    async (request) => service.list(request.query),
+    async (request) => {
+      const scope = await scopeOf(request);
+      if (scope.kind === "club") return service.list(request.query);
+      if (scope.coachId === null) return [];
+      return service.list({ ...request.query, coachId: scope.coachId });
+    },
   );
 
   api.get(
     "/api/workouts/:id",
     { preHandler: anyStaff, schema: { params: idParams, response: { 200: workoutView } } },
-    async (request) => service.get(request.params.id),
+    async (request) => {
+      const workout = await service.get(request.params.id);
+      assertOwnedBy(await scopeOf(request), workout.coachId);
+      return workout;
+    },
   );
 
   api.post(

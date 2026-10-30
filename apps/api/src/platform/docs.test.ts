@@ -70,7 +70,7 @@ describe("OpenAPI document", () => {
         "GET /api/coaches/{id}/members",
       ]),
     );
-    expect(operations().filter(({ path }) => path.startsWith("/api"))).toHaveLength(39);
+    expect(operations().filter(({ path }) => path.startsWith("/api"))).toHaveLength(40);
   });
 
   it("gives every endpoint a tag and a summary", () => {

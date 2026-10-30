@@ -8,6 +8,7 @@ export const API_VERSION = "0.1.0";
 
 const SUMMARIES: Record<string, string> = {
   "GET /health": "Check that the service is running",
+  "GET /api/me": "Show the signed-in account, its roles and its coach profile",
 
   "GET /api/tariffs": "List tariffs",
   "GET /api/tariffs/:id": "Get a tariff",
@@ -58,6 +59,7 @@ const SUMMARIES: Record<string, string> = {
 
 const TAGS: Record<string, string> = {
   health: "System",
+  me: "System",
   tariffs: "Tariffs",
   studios: "Studios",
   coaches: "Coaches",

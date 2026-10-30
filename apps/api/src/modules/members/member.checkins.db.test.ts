@@ -193,7 +193,7 @@ describe("visit history", () => {
       await checkIn(member.id);
     }
 
-    const headers = await auth.bearer(["coach"]);
+    const headers = await auth.bearer(["reception"]);
     const first = await app.inject({
       method: "GET",
       url: `/api/members/${member.id}/check-ins?limit=2`,

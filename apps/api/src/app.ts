@@ -19,6 +19,8 @@ import type { Db } from "./platform/db/client.js";
 import { registerDocs } from "./platform/docs.js";
 import { registerErrorHandler } from "./platform/errors.js";
 import { createMailer } from "./platform/mailer.js";
+import { meRoutes } from "./platform/me.routes.js";
+import { createScopeResolver } from "./platform/scope.js";
 import type { Mailer } from "./platform/mailer.js";
 import { createPgBossQueue } from "./platform/queue.js";
 import type { Queue } from "./platform/queue.js";
@@ -82,12 +84,16 @@ export function buildApp(config: Config, overrides: AppOverrides = {}): FastifyI
     app.addHook("onClose", () => queue.stop());
   }
 
+  const coachIdOf = (subject: string) => services.coaches.idOfSubject(subject);
+  const scopeOf = createScopeResolver(coachIdOf);
+
   app.register(healthRoutes);
+  app.register(meRoutes, { requireRole, coachIdOf });
   app.register(tariffRoutes, { service: services.tariffs, requireRole });
   app.register(studioRoutes, { service: services.studios, requireRole });
   app.register(coachRoutes, { service: services.coaches, requireRole });
-  app.register(memberRoutes, { service: services.members, requireRole });
-  app.register(workoutRoutes, { service: services.workouts, requireRole });
+  app.register(memberRoutes, { service: services.members, requireRole, scopeOf });
+  app.register(workoutRoutes, { service: services.workouts, requireRole, scopeOf });
   app.register(reminderRoutes, { service: services.reminders, requireRole });
   app.register(reportRoutes, { service: services.reports, requireRole });
 

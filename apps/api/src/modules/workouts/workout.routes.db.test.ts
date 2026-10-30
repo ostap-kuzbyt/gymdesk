@@ -155,7 +155,7 @@ describe("scheduling", () => {
       reservations: [],
     });
 
-    const fetched = await call("GET", `/api/workouts/${response.json().id}`, "coach");
+    const fetched = await call("GET", `/api/workouts/${response.json().id}`, "reception");
     expect(fetched.json()).toEqual(response.json());
   });
 
@@ -258,21 +258,21 @@ describe("schedule view", () => {
     });
 
     const range = `from=2026-11-01&to=2026-11-30&studioId=${base.studioId}`;
-    const list = await call("GET", `/api/workouts?${range}`, "coach");
+    const list = await call("GET", `/api/workouts?${range}`, "reception");
     expect(list.json().map((item: { id: string }) => item.id)).toEqual([kept.id]);
     expect(list.json()[0]).toMatchObject({ reserved: 1, capacity: 5 });
 
     const withCancelled = await call(
       "GET",
       `/api/workouts?${range}&includeCancelled=true`,
-      "coach",
+      "reception",
     );
     expect(withCancelled.json()).toHaveLength(2);
 
     const byCoach = await call(
       "GET",
       `/api/workouts?from=2026-11-01&to=2026-11-30&coachId=${other.coachId}`,
-      "coach",
+      "reception",
     );
     expect(byCoach.json()).toHaveLength(1);
   });

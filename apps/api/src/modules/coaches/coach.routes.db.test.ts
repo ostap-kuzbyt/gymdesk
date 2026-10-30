@@ -252,7 +252,7 @@ describe("assigned members", () => {
     await assign(boris.id, coach.id);
     await assign(stranger.id, other.id);
 
-    const headers = await auth.bearer(["coach"]);
+    const headers = await auth.bearer(["reception"]);
     const all = await app.inject({
       method: "GET",
       url: `/api/coaches/${coach.id}/members`,

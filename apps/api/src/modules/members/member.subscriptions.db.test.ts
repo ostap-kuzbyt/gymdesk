@@ -101,7 +101,7 @@ describe("purchasing a subscription", () => {
     const subscriptions = await app.inject({
       method: "GET",
       url: `/api/members/${member.id}/subscriptions`,
-      headers: await auth.bearer(["coach"]),
+      headers: await auth.bearer(["reception"]),
     });
     expect(subscriptions.json()[0]).toMatchObject({ priceCents: 4900, visitLimit: 10 });
   });
@@ -259,7 +259,7 @@ describe("concurrent purchases", () => {
 });
 
 describe("members that are about to expire", () => {
-  async function expiring(days: number, role: "admin" | "coach" = "admin") {
+  async function expiring(days: number, role: "admin" | "reception" = "admin") {
     const response = await app.inject({
       method: "GET",
       url: `/api/members?expiringWithinDays=${days}&limit=100`,
@@ -307,14 +307,14 @@ describe("members that are about to expire", () => {
     expect(result.items[0]?.activeUntil).toBe(addDays(TODAY, 4));
   });
 
-  it("widens with the window and is readable by coaches", async () => {
+  it("widens with the window and is readable by the front desk", async () => {
     const member = await createMember();
     await purchase(member.id, {
       tariffId: (await createTariff("Twenty days", { durationDays: 20 })).id,
     });
 
     expect((await expiring(7)).items.map((item) => item.id)).not.toContain(member.id);
-    expect((await expiring(30, "coach")).items.map((item) => item.id)).toContain(member.id);
+    expect((await expiring(30, "reception")).items.map((item) => item.id)).toContain(member.id);
   });
 
   it("combines with the search term", async () => {

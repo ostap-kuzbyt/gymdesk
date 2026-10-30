@@ -12,15 +12,18 @@ import {
   visitHistoryQuery,
   visitPage,
 } from "@gymdesk/shared";
-import type { FastifyPluginAsync } from "fastify";
+import type { FastifyPluginAsync, FastifyRequest } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import type { RoleGuard } from "../../platform/auth.js";
+import { assertOwnedBy } from "../../platform/scope.js";
+import type { ScopeResolver } from "../../platform/scope.js";
 import type { MemberService } from "./member.service.js";
 
 export interface MemberRoutesOptions {
   service: MemberService;
   requireRole: RoleGuard;
+  scopeOf: ScopeResolver;
 }
 
 const idParams = z.object({ id });
@@ -28,22 +31,33 @@ const subscriptionParams = z.object({ id, subscriptionId: id });
 
 export const memberRoutes: FastifyPluginAsync<MemberRoutesOptions> = async (
   app,
-  { service, requireRole },
+  { service, requireRole, scopeOf },
 ) => {
   const api = app.withTypeProvider<ZodTypeProvider>();
   const anyStaff = requireRole("admin", "reception", "coach");
   const frontDesk = requireRole("admin", "reception");
 
+  async function ownMember(request: FastifyRequest, memberId: string) {
+    const member = await service.get(memberId);
+    assertOwnedBy(await scopeOf(request), member.coachId);
+    return member;
+  }
+
   api.get(
     "/api/members",
     { preHandler: anyStaff, schema: { querystring: memberSearch, response: { 200: memberPage } } },
-    async (request) => service.search(request.query),
+    async (request) => {
+      const scope = await scopeOf(request);
+      if (scope.kind === "club") return service.search(request.query);
+      if (scope.coachId === null) return { items: [], total: 0 };
+      return service.search({ ...request.query, coachId: scope.coachId });
+    },
   );
 
   api.get(
     "/api/members/:id",
     { preHandler: anyStaff, schema: { params: idParams, response: { 200: memberView } } },
-    async (request) => service.get(request.params.id),
+    async (request) => ownMember(request, request.params.id),
   );
 
   api.post(
@@ -70,7 +84,7 @@ export const memberRoutes: FastifyPluginAsync<MemberRoutesOptions> = async (
       preHandler: anyStaff,
       schema: { params: idParams, response: { 200: z.array(subscriptionView) } },
     },
-    async (request) => (await service.get(request.params.id)).subscriptions,
+    async (request) => (await ownMember(request, request.params.id)).subscriptions,
   );
 
   api.post(
@@ -107,7 +121,10 @@ export const memberRoutes: FastifyPluginAsync<MemberRoutesOptions> = async (
       preHandler: anyStaff,
       schema: { params: idParams, querystring: visitHistoryQuery, response: { 200: visitPage } },
     },
-    async (request) => service.visits(request.params.id, request.query),
+    async (request) => {
+      await ownMember(request, request.params.id);
+      return service.visits(request.params.id, request.query);
+    },
   );
 
   api.put(
@@ -125,6 +142,9 @@ export const memberRoutes: FastifyPluginAsync<MemberRoutesOptions> = async (
       preHandler: anyStaff,
       schema: { params: idParams, querystring: memberSearch, response: { 200: memberPage } },
     },
-    async (request) => service.membersOfCoach(request.params.id, request.query),
+    async (request) => {
+      assertOwnedBy(await scopeOf(request), request.params.id);
+      return service.membersOfCoach(request.params.id, request.query);
+    },
   );
 };

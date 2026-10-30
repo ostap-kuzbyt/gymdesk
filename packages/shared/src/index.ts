@@ -1,4 +1,5 @@
 export * from "./coaches.js";
+export * from "./me.js";
 export * from "./members.js";
 export * from "./primitives.js";
 export * from "./reminders.js";

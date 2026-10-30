@@ -121,7 +121,7 @@ describe("registration", () => {
 describe("read and update", () => {
   it("returns a registered member and 404 for an unknown id", async () => {
     const created = (await register({ email: "read@example.com" })).json();
-    const headers = await auth.bearer(["coach"]);
+    const headers = await auth.bearer(["reception"]);
 
     const found = await app.inject({ method: "GET", url: `/api/members/${created.id}`, headers });
     expect(found.json()).toEqual(created);
