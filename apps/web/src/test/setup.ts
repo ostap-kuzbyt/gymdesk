@@ -1,11 +1,17 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
-import { afterEach, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, vi } from "vitest";
+import { server } from "./msw/server";
+
+beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
 
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  server.resetHandlers();
 });
+
+afterAll(() => server.close());
 
 Object.defineProperty(window, "matchMedia", {
   writable: true,
