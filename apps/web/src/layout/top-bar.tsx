@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ChevronDown, LogOut, Menu, Search } from "lucide-react";
 import { useState } from "react";
 import { useSession } from "@/auth/session";
+import { PlateMark } from "@/components/plate-mark";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +21,7 @@ import { usePalette } from "@/palette/palette-context";
 const tabClass =
   "relative flex h-14 items-center px-3 text-sm font-medium whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:-outline-offset-2";
 const activeTabClass =
-  "text-foreground after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:bg-primary";
+  "text-foreground after:absolute after:inset-x-3 after:bottom-0 after:h-[3px] after:bg-plate-yellow";
 
 function initialsOf(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -39,7 +40,7 @@ function UserMenu() {
         <Button variant="ghost" className="gap-2 px-2" aria-label="Account menu">
           <span
             aria-hidden
-            className="grid size-6 place-items-center rounded-full bg-accent text-xs font-semibold text-accent-foreground"
+            className="grid size-6 place-items-center rounded-full bg-plate-yellow text-xs font-semibold text-plate-yellow-foreground"
           >
             {initialsOf(name)}
           </span>
@@ -102,7 +103,10 @@ function MobileNav() {
       </SheetTrigger>
       <SheetContent side="left" className="w-64">
         <SheetHeader>
-          <SheetTitle className="font-stamp text-xl">Gymdesk</SheetTitle>
+          <SheetTitle className="flex items-center gap-2 font-stamp text-xl">
+            <PlateMark />
+            Gymdesk
+          </SheetTitle>
         </SheetHeader>
         <nav aria-label="Pages" className="flex flex-col px-2 pb-4">
           {navFor(roles).map((item) => (
@@ -155,9 +159,10 @@ export function TopBar() {
   const { roles } = useSession();
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border bg-card px-3 sm:px-6">
+    <header className="dark sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-white/10 bg-rubber px-3 text-foreground sm:px-6">
       <MobileNav />
-      <Link to="/" className="mr-4 font-stamp text-xl">
+      <Link to="/" className="mr-5 flex items-center gap-2 font-stamp text-xl">
+        <PlateMark />
         Gymdesk
       </Link>
       <nav aria-label="Pages" className="hidden h-full md:flex">
