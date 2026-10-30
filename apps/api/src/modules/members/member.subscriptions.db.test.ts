@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { buildApp } from "../../app.js";
+import { addDays } from "../../platform/dates.js";
 import { createTestAuth } from "../../testing/test-auth.js";
 import type { TestAuth } from "../../testing/test-auth.js";
 import { fixedClock } from "../../testing/test-clock.js";
@@ -254,5 +255,89 @@ describe("concurrent purchases", () => {
       headers: await auth.bearer(["admin"]),
     });
     expect(stored.json()).toHaveLength(1);
+  });
+});
+
+describe("members that are about to expire", () => {
+  async function expiring(days: number, role: "admin" | "coach" = "admin") {
+    const response = await app.inject({
+      method: "GET",
+      url: `/api/members?expiringWithinDays=${days}&limit=100`,
+      headers: await auth.bearer([role]),
+    });
+    return response.json() as {
+      items: { id: string; fullName: string; activeUntil: string }[];
+      total: number;
+    };
+  }
+
+  it("lists members whose active subscription ends within the window, leaving out the rest", async () => {
+    const soon = await createMember();
+    await purchase(soon.id, {
+      tariffId: (await createTariff("Five days", { durationDays: 5 })).id,
+    });
+
+    const later = await createMember();
+    await purchase(later.id, {
+      tariffId: (await createTariff("Long one", { durationDays: 40 })).id,
+    });
+
+    const renewed = await createMember();
+    const short = await createTariff("Short renewable", { durationDays: 5 });
+    await purchase(renewed.id, { tariffId: short.id });
+    await purchase(renewed.id, { tariffId: short.id, startsOn: addDays(TODAY, 5) });
+
+    const upcoming = await createMember();
+    await purchase(upcoming.id, { tariffId: short.id, startsOn: addDays(TODAY, 3) });
+
+    const cancelled = await createMember();
+    const bought = await purchase(cancelled.id, { tariffId: short.id });
+    await app.inject({
+      method: "POST",
+      url: `/api/members/${cancelled.id}/subscriptions/${bought.json().subscriptions[0].id}/cancel`,
+      headers: await auth.bearer(["reception"]),
+    });
+
+    await createMember();
+
+    const result = await expiring(7);
+
+    expect(result.items.map((item) => item.id)).toEqual([soon.id]);
+    expect(result.total).toBe(1);
+    expect(result.items[0]?.activeUntil).toBe(addDays(TODAY, 4));
+  });
+
+  it("widens with the window and is readable by coaches", async () => {
+    const member = await createMember();
+    await purchase(member.id, {
+      tariffId: (await createTariff("Twenty days", { durationDays: 20 })).id,
+    });
+
+    expect((await expiring(7)).items.map((item) => item.id)).not.toContain(member.id);
+    expect((await expiring(30, "coach")).items.map((item) => item.id)).toContain(member.id);
+  });
+
+  it("combines with the search term", async () => {
+    const member = await createMember();
+    await purchase(member.id, { tariffId: (await createTariff("Quick", { durationDays: 3 })).id });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/api/members?expiringWithinDays=7&q=no-such-person",
+      headers: await auth.bearer(["admin"]),
+    });
+
+    expect(response.json().total).toBe(0);
+  });
+
+  it("rejects a window outside 1 to 60 days", async () => {
+    for (const days of [0, 61, "abc"]) {
+      const response = await app.inject({
+        method: "GET",
+        url: `/api/members?expiringWithinDays=${days}`,
+        headers: await auth.bearer(["admin"]),
+      });
+      expect(response.statusCode).toBe(400);
+    }
   });
 });

@@ -11,6 +11,7 @@ import {
   inArray,
   isNull,
   lte,
+  exists,
   notExists,
   or,
   sql,
@@ -51,6 +52,7 @@ export interface ExpiringRow {
 export interface MemberSearch {
   q: string | undefined;
   coachId?: string | undefined;
+  expiringBy?: string | undefined;
   limit: number;
   offset: number;
   today: string;
@@ -81,6 +83,36 @@ async function upsertSubscriptions(db: Executor, memberId: string, items: Subscr
       target: subscriptions.id,
       set: { cancelledOn: sql`excluded.cancelled_on` },
     });
+}
+
+function hasSubscriptionEndingBy(db: Executor, today: string, lastDay: string) {
+  const renewal = alias(subscriptions, "renewal");
+  return exists(
+    db
+      .select({ one: sql`1` })
+      .from(subscriptions)
+      .where(
+        and(
+          eq(subscriptions.memberId, members.id),
+          isNull(subscriptions.cancelledOn),
+          lte(subscriptions.startsOn, today),
+          gte(subscriptions.endsOn, today),
+          lte(subscriptions.endsOn, lastDay),
+          notExists(
+            db
+              .select({ one: sql`1` })
+              .from(renewal)
+              .where(
+                and(
+                  eq(renewal.memberId, subscriptions.memberId),
+                  isNull(renewal.cancelledOn),
+                  gt(renewal.startsOn, subscriptions.endsOn),
+                ),
+              ),
+          ),
+        ),
+      ),
+  );
 }
 
 export const memberRepo = {
@@ -140,6 +172,9 @@ export const memberRepo = {
           )
         : undefined,
       options.coachId ? eq(members.coachId, options.coachId) : undefined,
+      options.expiringBy
+        ? hasSubscriptionEndingBy(db, options.today, options.expiringBy)
+        : undefined,
     );
 
     const page = await db

@@ -1,4 +1,5 @@
 import type { Clock } from "../../platform/clock.js";
+import { addDays } from "../../platform/dates.js";
 import type { Db } from "../../platform/db/client.js";
 import { withTx } from "../../platform/db/tx.js";
 import { ConflictError, DomainError, NotFoundError } from "../../platform/errors.js";
@@ -59,6 +60,7 @@ export interface PageQuery {
   q?: string | undefined;
   limit: number;
   offset: number;
+  expiringWithinDays?: number | undefined;
 }
 
 export class MemberService {
@@ -189,6 +191,10 @@ export class MemberService {
     const { rows, total } = await memberRepo.search(this.db, {
       q: options.q,
       coachId: options.coachId,
+      expiringBy:
+        options.expiringWithinDays === undefined
+          ? undefined
+          : addDays(today, options.expiringWithinDays),
       limit: options.limit,
       offset: options.offset,
       today,
