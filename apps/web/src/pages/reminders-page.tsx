@@ -149,9 +149,9 @@ export function RemindersPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Member</TableHead>
-                <TableHead>Reminder</TableHead>
+                <TableHead className="hidden sm:table-cell">Reminder</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>When</TableHead>
+                <TableHead className="hidden md:table-cell">When</TableHead>
                 <TableHead className="w-28" />
               </TableRow>
             </TableHeader>
@@ -169,8 +169,12 @@ export function RemindersPage() {
                         {reminder.memberName}
                       </Link>
                       <div className="text-xs text-muted-foreground">{reminder.email}</div>
+                      <div className="text-xs text-muted-foreground sm:hidden">
+                        {KIND_LABELS[reminder.kind]} ·{" "}
+                        {formatDateTime(reminder.sentAt ?? reminder.createdAt)}
+                      </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden sm:table-cell">
                       {KIND_LABELS[reminder.kind]}
                       <div className="text-xs text-muted-foreground">
                         {reminder.trigger === "scan" ? "Automatic" : "Sent by hand"}
@@ -187,7 +191,7 @@ export function RemindersPage() {
                         </div>
                       ) : null}
                     </TableCell>
-                    <TableCell className="tabular-nums">
+                    <TableCell className="hidden tabular-nums md:table-cell">
                       {formatDateTime(reminder.sentAt ?? reminder.createdAt)}
                       {reminder.attempts > 1 ? (
                         <div className="text-xs text-muted-foreground">

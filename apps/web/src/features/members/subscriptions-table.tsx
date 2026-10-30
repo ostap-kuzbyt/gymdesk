@@ -40,9 +40,9 @@ export function SubscriptionsTable({
         <TableRow>
           <TableHead>Status</TableHead>
           <TableHead>Tariff</TableHead>
-          <TableHead>Period</TableHead>
-          <TableHead className="text-right">Paid</TableHead>
-          <TableHead>Visits</TableHead>
+          <TableHead className="hidden sm:table-cell">Period</TableHead>
+          <TableHead className="hidden text-right md:table-cell">Paid</TableHead>
+          <TableHead className="hidden md:table-cell">Visits</TableHead>
           {onCancel ? <TableHead className="w-24" /> : null}
         </TableRow>
       </TableHeader>
@@ -59,12 +59,23 @@ export function SubscriptionsTable({
               </TableCell>
               <TableCell className="font-medium">
                 {names.get(subscription.tariffId) ?? "Tariff"}
+                <div className="text-xs font-normal text-muted-foreground sm:hidden">
+                  {formatPeriod(subscription.startsOn, subscription.endsOn)}
+                </div>
+                <div className="text-xs font-normal text-muted-foreground md:hidden">
+                  {formatMoney(subscription.priceCents, currency)} ·{" "}
+                  {formatVisits(subscription.visitLimit)}
+                </div>
               </TableCell>
-              <TableCell>{formatPeriod(subscription.startsOn, subscription.endsOn)}</TableCell>
-              <TableCell className="text-right font-stamp tabular-nums">
+              <TableCell className="hidden sm:table-cell">
+                {formatPeriod(subscription.startsOn, subscription.endsOn)}
+              </TableCell>
+              <TableCell className="hidden text-right font-stamp tabular-nums md:table-cell">
                 {formatMoney(subscription.priceCents, currency)}
               </TableCell>
-              <TableCell>{formatVisits(subscription.visitLimit)}</TableCell>
+              <TableCell className="hidden md:table-cell">
+                {formatVisits(subscription.visitLimit)}
+              </TableCell>
               {onCancel ? (
                 <TableCell className="text-right">
                   {subscription.status === "active" || subscription.status === "upcoming" ? (

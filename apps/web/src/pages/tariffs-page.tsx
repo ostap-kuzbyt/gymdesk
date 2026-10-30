@@ -80,8 +80,8 @@ export function TariffsPage() {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead className="text-right">Price</TableHead>
-              <TableHead>Valid for</TableHead>
-              <TableHead>Visits</TableHead>
+              <TableHead className="hidden sm:table-cell">Valid for</TableHead>
+              <TableHead className="hidden sm:table-cell">Visits</TableHead>
               {canEdit ? <TableHead className="w-40" /> : null}
             </TableRow>
           </TableHeader>
@@ -98,12 +98,19 @@ export function TariffsPage() {
                       Archived
                     </Badge>
                   ) : null}
+                  <div className="text-xs font-normal text-muted-foreground sm:hidden">
+                    {formatTerm(tariff.durationDays)} · {formatVisits(tariff.visitLimit)}
+                  </div>
                 </TableCell>
                 <TableCell className="text-right font-stamp tabular-nums">
                   {formatMoney(tariff.priceCents, currency)}
                 </TableCell>
-                <TableCell>{formatTerm(tariff.durationDays)}</TableCell>
-                <TableCell>{formatVisits(tariff.visitLimit)}</TableCell>
+                <TableCell className="hidden sm:table-cell">
+                  {formatTerm(tariff.durationDays)}
+                </TableCell>
+                <TableCell className="hidden sm:table-cell">
+                  {formatVisits(tariff.visitLimit)}
+                </TableCell>
                 {canEdit ? (
                   <TableCell className="text-right">
                     {tariff.archived ? null : (

@@ -33,14 +33,13 @@ describe("profile", () => {
     await openProfile(profileApi(state), state);
 
     const rows = await screen.findAllByRole("row", { name: /Monthly|Quarterly/ });
-    expect(rows.map((row) => within(row).getAllByRole("cell")[1]?.textContent)).toEqual([
-      "Monthly",
-      "Quarterly",
-    ]);
+    expect(rows.map((row) => within(row).getAllByRole("cell")[1]?.firstChild?.textContent)).toEqual(
+      ["Monthly", "Quarterly"],
+    );
     expect(within(rows[0] as HTMLElement).getByText("Active")).toBeInTheDocument();
-    expect(within(rows[0] as HTMLElement).getByText(/49\.00/)).toBeInTheDocument();
+    expect(within(rows[0] as HTMLElement).getAllByText(/49\.00/).length).toBeGreaterThan(0);
     expect(within(rows[1] as HTMLElement).getByText("Ended")).toBeInTheDocument();
-    expect(within(rows[1] as HTMLElement).getByText("20 visits")).toBeInTheDocument();
+    expect(within(rows[1] as HTMLElement).getAllByText(/20 visits/).length).toBeGreaterThan(0);
   });
 
   it("explains when there are no subscriptions or visits", async () => {

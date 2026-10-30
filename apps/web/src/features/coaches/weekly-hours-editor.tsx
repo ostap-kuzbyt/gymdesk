@@ -36,7 +36,7 @@ export function WeeklyHoursEditor({ control, register, errors }: WeeklyHoursEdit
           rowErrors?.from?.message ?? rowErrors?.to?.message ?? rowErrors?.weekday?.message;
         return (
           <div key={field.id} className="flex flex-col gap-1">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <NativeSelect
                 size="sm"
                 aria-label={`Day for window ${index + 1}`}

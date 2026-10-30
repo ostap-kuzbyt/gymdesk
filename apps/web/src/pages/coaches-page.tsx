@@ -78,7 +78,7 @@ export function CoachesPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Coach</TableHead>
-              <TableHead>Working hours</TableHead>
+              <TableHead className="hidden sm:table-cell">Working hours</TableHead>
               {canEdit ? <TableHead className="w-40" /> : null}
             </TableRow>
           </TableHeader>
@@ -104,8 +104,15 @@ export function CoachesPage() {
                       </Badge>
                     ) : null}
                     <div className="text-xs text-muted-foreground">{coach.specialization}</div>
+                    <div className="mt-1 text-xs sm:hidden">
+                      {hours.length === 0 ? (
+                        <span className="text-muted-foreground">No hours set</span>
+                      ) : (
+                        hours.map((line) => <div key={line}>{line}</div>)
+                      )}
+                    </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     {hours.length === 0 ? (
                       <span className="text-muted-foreground">No hours set</span>
                     ) : (

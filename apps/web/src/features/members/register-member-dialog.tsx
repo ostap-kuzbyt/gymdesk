@@ -95,7 +95,7 @@ function RegisterForm({ close }: { close: () => void }) {
           {...field("fullName")}
         />
       </Field>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field id="member-birth" label="Date of birth" error={errors.birthDate?.message}>
           <Input
             id="member-birth"

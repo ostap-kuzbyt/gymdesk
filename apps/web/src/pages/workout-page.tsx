@@ -161,7 +161,7 @@ function WorkoutDetails({ workout }: { workout: WorkoutView }) {
             <TableHeader>
               <TableRow>
                 <TableHead>Member</TableHead>
-                <TableHead>Booked</TableHead>
+                <TableHead className="hidden sm:table-cell">Booked</TableHead>
                 <TableHead>Status</TableHead>
                 {frontDesk && open ? <TableHead className="w-32" /> : null}
               </TableRow>
@@ -181,7 +181,7 @@ function WorkoutDetails({ workout }: { workout: WorkoutView }) {
                       {reservation.memberName}
                     </Link>
                   </TableCell>
-                  <TableCell className="tabular-nums">
+                  <TableCell className="hidden tabular-nums sm:table-cell">
                     {formatDate(reservation.reservedAt.slice(0, 10))}{" "}
                     {formatTime(reservation.reservedAt)}
                   </TableCell>

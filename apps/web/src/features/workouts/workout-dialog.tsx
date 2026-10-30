@@ -165,7 +165,7 @@ function WorkoutForm({ close }: { close: () => void }) {
         />
       </Field>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field id="workout-kind" label="Type">
           <NativeSelect id="workout-kind" className="w-full" {...register("kind")}>
             <NativeSelectOption value="group">Group workout</NativeSelectOption>
@@ -191,7 +191,7 @@ function WorkoutForm({ close }: { close: () => void }) {
         ) : null}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field id="workout-studio" label="Studio" error={errors.studioId?.message}>
           <NativeSelect
             id="workout-studio"
@@ -224,7 +224,7 @@ function WorkoutForm({ close }: { close: () => void }) {
         </Field>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Field id="workout-date" label="Date" error={errors.date?.message}>
           <Input
             id="workout-date"
