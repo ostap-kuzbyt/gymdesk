@@ -127,6 +127,17 @@ describe("coach account link", () => {
     expect(within(notice).getByText("auth0|coach-777")).toBeInTheDocument();
   });
 
+  it("copies the account id so it can be handed over", async () => {
+    const user = userEvent.setup();
+    meAs(["coach"], null);
+    renderApp({ roles: ["coach"] });
+
+    await user.click(await screen.findByRole("button", { name: "Copy" }));
+
+    expect(await screen.findByRole("button", { name: "Copied" })).toBeInTheDocument();
+    expect(await navigator.clipboard.readText()).toBe("auth0|coach-777");
+  });
+
   it("stays quiet once the account is linked", async () => {
     meAs(["coach"], "6f1d7a52-2f0f-4a43-9a53-5d9b1a9b0001");
     renderApp({ roles: ["coach"] });
