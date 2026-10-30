@@ -155,6 +155,18 @@ describe("ending this week", () => {
     expect(screen.getByRole("img", { name: "1 day left" })).toBeInTheDocument();
   });
 
+  it("totals the subscriptions that end soon in the summary", async () => {
+    const api = todayApi({
+      expiring: [member(1, "First Person", 2), member(2, "Second Person", 4)],
+    });
+    await openToday(api);
+
+    await screen.findByText("Subscriptions end soon");
+    expect(screen.getByText("Subscriptions end soon").previousElementSibling).toHaveTextContent(
+      "2",
+    );
+  });
+
   it("asks the server for subscriptions ending within seven days", async () => {
     const api = todayApi();
     await openToday(api);
@@ -168,14 +180,14 @@ describe("front desk summary", () => {
   it("counts arrivals", async () => {
     await openToday(todayApi({ arrived: 4 }));
 
-    expect(await screen.findByText(/members have arrived today/)).toBeInTheDocument();
+    expect(await screen.findByText("Members arrived today")).toBeInTheDocument();
     expect(screen.getByText("4")).toBeInTheDocument();
   });
 
   it("uses the singular for one arrival", async () => {
     await openToday(todayApi({ arrived: 1 }));
 
-    expect(await screen.findByText(/member has arrived today/)).toBeInTheDocument();
+    expect(await screen.findByText("Member arrived today")).toBeInTheDocument();
   });
 
   it("warns about undelivered reminders with a link to review them", async () => {
@@ -192,7 +204,7 @@ describe("front desk summary", () => {
   it("stays quiet when every reminder went out", async () => {
     await openToday(todayApi({ failed: 0, arrived: 2 }));
 
-    await screen.findByText(/members have arrived today/);
+    await screen.findByText("Members arrived today");
     expect(screen.queryByText(/could not be delivered/)).not.toBeInTheDocument();
   });
 
@@ -211,7 +223,7 @@ describe("admin", () => {
     const api = todayApi({ revenue: { totalCents: 123456, totalSubscriptions: 12 } });
     await openToday(api, { roles: ["admin"] });
 
-    expect(await screen.findByText(/sold this month from 12 subscriptions/)).toBeInTheDocument();
+    expect(await screen.findByText(/from 12 subscriptions/)).toBeInTheDocument();
     expect(screen.getByText(/1,234\.56/)).toBeInTheDocument();
     const url =
       api.urls("GET").find((candidate) => candidate.startsWith("/api/reports/revenue")) ?? "";
@@ -240,7 +252,7 @@ describe("coach", () => {
     expect(await screen.findByText("Functional training")).toBeInTheDocument();
     expect(await screen.findByText("Olena Shevchenko")).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Open check-in" })).not.toBeInTheDocument();
-    expect(screen.queryByText(/have arrived today/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/arrived today/)).not.toBeInTheDocument();
     expect(screen.queryByText(/could not be delivered/)).not.toBeInTheDocument();
     expect(
       api

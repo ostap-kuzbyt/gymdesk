@@ -1,7 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { useSession } from "@/auth/session";
 import { PageHeader } from "@/components/page-header";
+import { Panel } from "@/components/panel";
 import { EmptyState, ErrorNotice, TableSkeleton } from "@/components/query-states";
+import { StatBlock } from "@/components/stat-block";
 import { Button } from "@/components/ui/button";
 import { useCoaches } from "@/features/coaches/api";
 import { useExpiringMembers } from "@/features/members/api";
@@ -38,11 +40,13 @@ export function TodayPage() {
   const monthStart = `${today.slice(0, 7)}-01`;
   const sales = useRevenue({ from: monthStart, to: today, granularity: "month", enabled: admin });
 
+  const todaysWorkouts = useWorkouts({ from: today, to: today });
+  const endingSoon = useExpiringMembers(EXPIRY_WINDOW_DAYS);
   const arrived = arrivals.data?.items.filter((item) => item.visits > 0).length;
   const failedCount = failed.data?.total ?? 0;
 
   return (
-    <section className="flex flex-col gap-8">
+    <section className="flex flex-col gap-6">
       <PageHeader
         title="Today"
         description={`${WEEKDAY_LONG[weekdayOf(today) - 1]}, ${formatDate(today)}`}
@@ -75,25 +79,36 @@ export function TodayPage() {
         </div>
       ) : null}
 
-      {frontDesk || admin ? (
-        <ul className="flex flex-wrap gap-x-8 gap-y-2 text-muted-foreground">
-          {frontDesk && arrived !== undefined ? (
-            <li>
-              <span className="font-stamp text-xl text-foreground tabular-nums">{arrived}</span>{" "}
-              {arrived === 1 ? "member has" : "members have"} arrived today
-            </li>
-          ) : null}
-          {admin && sales.data ? (
-            <li>
-              <span className="font-stamp text-xl text-foreground tabular-nums">
-                {formatMoney(sales.data.totalCents, currency)}
-              </span>{" "}
-              sold this month from {sales.data.totalSubscriptions}{" "}
-              {sales.data.totalSubscriptions === 1 ? "subscription" : "subscriptions"}
-            </li>
-          ) : null}
-        </ul>
-      ) : null}
+      <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(15rem,1fr))]">
+        {frontDesk ? (
+          <StatBlock
+            tone="green"
+            value={arrived === undefined ? "–" : String(arrived)}
+            label={arrived === 1 ? "Member arrived today" : "Members arrived today"}
+          />
+        ) : null}
+        <StatBlock
+          value={todaysWorkouts.data ? String(todaysWorkouts.data.length) : "–"}
+          label={todaysWorkouts.data?.length === 1 ? "Workout scheduled" : "Workouts scheduled"}
+        />
+        <StatBlock
+          tone="yellow"
+          value={endingSoon.data ? String(endingSoon.data.total) : "–"}
+          label={endingSoon.data?.total === 1 ? "Subscription ends soon" : "Subscriptions end soon"}
+          note={`Within the next ${EXPIRY_WINDOW_DAYS} days`}
+        />
+        {admin && sales.data ? (
+          <StatBlock
+            tone="blue"
+            compact
+            value={formatMoney(sales.data.totalCents, currency)}
+            label="Sold this month"
+            note={`from ${sales.data.totalSubscriptions} ${
+              sales.data.totalSubscriptions === 1 ? "subscription" : "subscriptions"
+            }`}
+          />
+        ) : null}
+      </div>
 
       <div className="grid gap-10 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <TodaysWorkouts today={today} />
@@ -113,9 +128,9 @@ function TodaysWorkouts({ today }: { today: string }) {
     coaches.data?.find((coach) => coach.id === id)?.fullName ?? "Coach";
 
   return (
-    <div>
-      <div className="mb-3 flex items-baseline justify-between gap-3">
-        <h2>Workouts today</h2>
+    <Panel
+      title="Workouts today"
+      action={
         <Link
           to="/schedule"
           search={{ week: undefined, studio: undefined, coach: undefined }}
@@ -123,7 +138,8 @@ function TodaysWorkouts({ today }: { today: string }) {
         >
           Full schedule
         </Link>
-      </div>
+      }
+    >
       {workouts.isPending ? <TableSkeleton columns={2} rows={3} /> : null}
       {workouts.isError ? (
         <ErrorNotice error={workouts.error} onRetry={() => void workouts.refetch()} />
@@ -142,7 +158,7 @@ function TodaysWorkouts({ today }: { today: string }) {
                   <Link
                     to="/workouts/$workoutId"
                     params={{ workoutId: workout.id }}
-                    className="flex items-center gap-4 py-3 hover:bg-accent/50 focus-visible:outline-2"
+                    className="-mx-4 flex items-center gap-4 px-4 py-3 hover:bg-accent focus-visible:outline-2"
                   >
                     <span className="w-28 shrink-0 font-stamp text-lg tabular-nums">
                       {workout.startTime}–{workout.endTime}
@@ -166,7 +182,7 @@ function TodaysWorkouts({ today }: { today: string }) {
             })}
         </ul>
       ) : null}
-    </div>
+    </Panel>
   );
 }
 
@@ -178,10 +194,10 @@ function EndingSoon() {
   );
 
   return (
-    <div>
-      <div className="mb-3 flex items-baseline justify-between gap-3">
-        <h2>Ending this week</h2>
-        {isFrontDesk(roles) ? (
+    <Panel
+      title="Ending this week"
+      action={
+        isFrontDesk(roles) ? (
           <Link
             to="/reminders"
             search={{ status: undefined, kind: undefined, page: undefined }}
@@ -189,8 +205,9 @@ function EndingSoon() {
           >
             Reminders
           </Link>
-        ) : null}
-      </div>
+        ) : null
+      }
+    >
       {expiring.isPending ? <TableSkeleton columns={2} rows={3} /> : null}
       {expiring.isError ? (
         <ErrorNotice error={expiring.error} onRetry={() => void expiring.refetch()} />
@@ -221,6 +238,6 @@ function EndingSoon() {
           ))}
         </ul>
       ) : null}
-    </div>
+    </Panel>
   );
 }
