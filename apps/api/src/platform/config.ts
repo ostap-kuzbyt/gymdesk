@@ -5,6 +5,15 @@ const optionalText = z
   .optional()
   .transform((value) => (value === undefined || value.trim() === "" ? undefined : value.trim()));
 
+function isOrigin(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return (url.protocol === "https:" || url.protocol === "http:") && url.origin === value;
+  } catch {
+    return false;
+  }
+}
+
 const configSchema = z
   .object({
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
@@ -40,6 +49,14 @@ const configSchema = z
       .default("0 8 * * *"),
     SENDGRID_API_KEY: optionalText,
     MAIL_FROM: optionalText,
+    CORS_ORIGIN: optionalText
+      .transform((value) =>
+        value === undefined ? [] : value.split(",").map((item) => item.trim()),
+      )
+      .refine(
+        (origins) => origins.every(isOrigin),
+        "Must be a comma-separated list of origins like https://gymdesk.vercel.app",
+      ),
   })
   .superRefine((config, context) => {
     if (config.SENDGRID_API_KEY && !config.MAIL_FROM) {

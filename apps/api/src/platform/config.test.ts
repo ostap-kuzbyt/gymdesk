@@ -53,6 +53,31 @@ describe("loadConfig", () => {
     ).toBe("club@example.com");
   });
 
+  it("has no allowed origins unless CORS_ORIGIN is set", () => {
+    expect(loadConfig(required).CORS_ORIGIN).toEqual([]);
+    expect(loadConfig({ ...required, CORS_ORIGIN: "  " }).CORS_ORIGIN).toEqual([]);
+  });
+
+  it("reads a comma-separated list of origins", () => {
+    expect(
+      loadConfig({
+        ...required,
+        CORS_ORIGIN: "https://gymdesk.vercel.app, http://localhost:5173",
+      }).CORS_ORIGIN,
+    ).toEqual(["https://gymdesk.vercel.app", "http://localhost:5173"]);
+  });
+
+  it("rejects origins with a path, a trailing slash or no scheme", () => {
+    for (const bad of [
+      "gymdesk.vercel.app",
+      "https://gymdesk.vercel.app/",
+      "https://a.app/path",
+      "*",
+    ]) {
+      expect(() => loadConfig({ ...required, CORS_ORIGIN: bad })).toThrow(/CORS_ORIGIN/);
+    }
+  });
+
   it("rejects an unreasonable reminder window or discount", () => {
     expect(() => loadConfig({ ...required, REMINDER_DAYS_BEFORE: "0" })).toThrow(/REMINDER/);
     expect(() => loadConfig({ ...required, PROMO_DISCOUNT_PERCENT: "95" })).toThrow(/PROMO/);

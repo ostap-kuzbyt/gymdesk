@@ -1,3 +1,4 @@
+import cors from "@fastify/cors";
 import Fastify from "fastify";
 import type { FastifyInstance } from "fastify";
 import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
@@ -42,6 +43,15 @@ export function buildApp(config: Config, overrides: AppOverrides = {}): FastifyI
 
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
+
+  if (config.CORS_ORIGIN.length > 0) {
+    app.register(cors, {
+      origin: config.CORS_ORIGIN,
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+      allowedHeaders: ["authorization", "content-type"],
+      maxAge: 86_400,
+    });
+  }
 
   registerErrorHandler(app);
   registerDocs(app, config);
