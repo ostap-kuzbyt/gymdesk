@@ -54,6 +54,7 @@ function todayApi(setup: Setup = {}, overrides: Parameters<typeof mockApi>[0] = 
           id: IVAN,
           fullName: "Ivan Petrenko",
           specialization: "Strength",
+          authSubject: null,
           weeklyHours: [],
           archived: false,
           version: 1,

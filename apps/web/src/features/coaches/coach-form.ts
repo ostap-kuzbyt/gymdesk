@@ -22,6 +22,12 @@ export const coachFormSchema = z
       .min(2, "Enter a specialization")
       .max(80, "Keep it under 80 characters"),
     weeklyHours: z.array(windowSchema).max(21, "Use at most 21 working windows"),
+    authSubject: z
+      .string()
+      .trim()
+      .max(255, "Keep it under 255 characters")
+      .refine((value) => !/\s/.test(value), "The account ID must not contain spaces")
+      .refine((value) => value === "" || value.length >= 3, "The account ID is too short"),
   })
   .superRefine((values, context) => {
     values.weeklyHours.forEach((window, index) => {
@@ -61,6 +67,7 @@ export function toCoachInput(values: CoachFormValues): NewCoachInput {
       from: window.from,
       to: window.to,
     })),
+    authSubject: values.authSubject.trim() === "" ? null : values.authSubject.trim(),
   };
 }
 
@@ -73,6 +80,7 @@ export function formValuesOf(coach: CoachView): CoachFormValues {
       from: window.from,
       to: window.to,
     })),
+    authSubject: coach.authSubject ?? "",
   };
 }
 
@@ -80,4 +88,5 @@ export const emptyCoachForm: CoachFormValues = {
   fullName: "",
   specialization: "",
   weeklyHours: [],
+  authSubject: "",
 };

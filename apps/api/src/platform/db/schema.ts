@@ -57,18 +57,23 @@ export const studios = pgTable(
   ],
 );
 
-export const coaches = pgTable("coaches", {
-  id: uuid("id").primaryKey(),
-  fullName: text("full_name").notNull(),
-  specialization: text("specialization").notNull(),
-  weeklyHours: jsonb("weekly_hours")
-    .$type<{ weekday: number; from: string; to: string }[]>()
-    .notNull()
-    .default(sql`'[]'::jsonb`),
-  archived: boolean("archived").notNull().default(false),
-  version: integer("version").notNull().default(1),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const coaches = pgTable(
+  "coaches",
+  {
+    id: uuid("id").primaryKey(),
+    fullName: text("full_name").notNull(),
+    specialization: text("specialization").notNull(),
+    weeklyHours: jsonb("weekly_hours")
+      .$type<{ weekday: number; from: string; to: string }[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
+    authSubject: text("auth_subject"),
+    archived: boolean("archived").notNull().default(false),
+    version: integer("version").notNull().default(1),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex("coaches_auth_subject_unique").on(table.authSubject)],
+);
 
 export const members = pgTable(
   "members",

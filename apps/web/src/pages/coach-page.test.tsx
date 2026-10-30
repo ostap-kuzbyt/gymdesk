@@ -14,6 +14,7 @@ const coach = {
   id: COACH_ID,
   fullName: "Ivan Petrenko",
   specialization: "Strength training",
+  authSubject: null,
   weeklyHours: [
     { weekday: 1, from: "07:00", to: "13:00" },
     { weekday: 1, from: "16:00", to: "20:00" },

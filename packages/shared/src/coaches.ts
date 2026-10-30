@@ -9,14 +9,23 @@ export const workingHours = z.object({
   to: timeOfDay,
 });
 
+export const accountSubject = z
+  .string()
+  .trim()
+  .min(3)
+  .max(255)
+  .regex(/^\S+$/, "The account ID must not contain spaces");
+
 const coachFields = z.object({
   fullName: z.string().trim().min(2).max(120),
   specialization: z.string().trim().min(2).max(80),
   weeklyHours: z.array(workingHours).max(21),
+  authSubject: accountSubject.nullable(),
 });
 
 export const newCoach = coachFields.extend({
   weeklyHours: coachFields.shape.weeklyHours.default([]),
+  authSubject: coachFields.shape.authSubject.default(null),
 });
 
 export const coachChanges = coachFields.partial().extend({

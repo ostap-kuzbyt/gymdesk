@@ -57,6 +57,62 @@ async function assign(memberId: string, coachId: string | null) {
   });
 }
 
+describe("coach sign-in accounts", () => {
+  it("stores the account id, shows it to admins only and finds the coach by it", async () => {
+    const created = await createCoach({ authSubject: "auth0|account-one" });
+    expect(created.statusCode).toBe(201);
+    expect(created.json().authSubject).toBe("auth0|account-one");
+
+    const read = async (roles: ("admin" | "reception" | "coach")[]) =>
+      (
+        await app.inject({
+          method: "GET",
+          url: `/api/coaches/${created.json().id}`,
+          headers: await auth.bearer(roles),
+        })
+      ).json();
+    expect((await read(["admin"])).authSubject).toBe("auth0|account-one");
+    expect((await read(["reception"])).authSubject).toBeNull();
+    expect((await read(["coach"])).authSubject).toBeNull();
+
+    const list = await app.inject({
+      method: "GET",
+      url: "/api/coaches",
+      headers: await auth.bearer(["coach"]),
+    });
+    expect(
+      list.json().every((coach: { authSubject: string | null }) => coach.authSubject === null),
+    ).toBe(true);
+  });
+
+  it("refuses the same account on two coaches with 409", async () => {
+    await createCoach({ fullName: "First Holder", authSubject: "auth0|shared" });
+    const second = await createCoach({ fullName: "Second Holder", authSubject: "auth0|shared" });
+    expect(second.statusCode).toBe(409);
+  });
+
+  it("links, relinks and clears the account through a patch", async () => {
+    const created = (await createCoach()).json();
+    const patch = async (version: number, authSubject: string | null) =>
+      app.inject({
+        method: "PATCH",
+        url: `/api/coaches/${created.id}`,
+        headers: await auth.bearer(["admin"]),
+        payload: { version, authSubject },
+      });
+
+    const linked = await patch(1, "auth0|patched");
+    expect(linked.json()).toMatchObject({ authSubject: "auth0|patched", version: 2 });
+
+    const cleared = await patch(2, null);
+    expect(cleared.json()).toMatchObject({ authSubject: null, version: 3 });
+  });
+
+  it("answers 400 for an account id with spaces", async () => {
+    expect((await createCoach({ authSubject: "auth0|a b" })).statusCode).toBe(400);
+  });
+});
+
 describe("coach profiles", () => {
   it("lets staff read and only admins write", async () => {
     expect((await app.inject({ method: "GET", url: "/api/coaches" })).statusCode).toBe(401);

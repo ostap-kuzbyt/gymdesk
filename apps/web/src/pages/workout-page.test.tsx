@@ -83,6 +83,7 @@ function workoutApi(state: State, overrides: Parameters<typeof mockApi>[0] = {})
           id: COACH_ID,
           fullName: "Olha Koval",
           specialization: "Yoga",
+          authSubject: null,
           weeklyHours: [],
           archived: false,
           version: 1,

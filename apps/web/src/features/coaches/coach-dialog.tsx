@@ -25,6 +25,7 @@ const API_FIELD_TO_FORM: Record<string, Path<CoachFormValues>> = {
   fullName: "fullName",
   specialization: "specialization",
   weeklyHours: "weeklyHours",
+  authSubject: "authSubject",
 };
 
 export function CoachDialog({
@@ -98,6 +99,22 @@ function CoachForm({ coach, close }: { coach: CoachView | undefined; close: () =
           autoComplete="off"
           aria-invalid={!!errors.specialization}
           {...register("specialization")}
+        />
+      </Field>
+
+      <Field
+        id="coach-account"
+        label="Sign-in account ID"
+        hint="The user ID from Auth0, like auth0|64f2c1. A coach who signs in with it sees only their own schedule and members."
+        error={errors.authSubject?.message}
+      >
+        <Input
+          id="coach-account"
+          autoComplete="off"
+          spellCheck={false}
+          placeholder="Optional"
+          aria-invalid={!!errors.authSubject}
+          {...register("authSubject")}
         />
       </Field>
 

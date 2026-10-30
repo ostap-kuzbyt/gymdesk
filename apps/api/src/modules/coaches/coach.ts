@@ -16,6 +16,7 @@ export interface CoachSnapshot {
   fullName: string;
   specialization: string;
   weeklyHours: WorkingHours[];
+  authSubject: string | null;
   archived: boolean;
   version: number;
 }
@@ -24,15 +25,20 @@ export interface NewCoach {
   fullName: string;
   specialization: string;
   weeklyHours?: WorkingHours[] | undefined;
+  authSubject?: string | null | undefined;
 }
 
 export interface CoachChanges {
   fullName?: string | undefined;
   specialization?: string | undefined;
   weeklyHours?: WorkingHours[] | undefined;
+  authSubject?: string | null | undefined;
 }
 
-type CoachTerms = Pick<CoachSnapshot, "fullName" | "specialization" | "weeklyHours">;
+type CoachTerms = Pick<
+  CoachSnapshot,
+  "fullName" | "specialization" | "weeklyHours" | "authSubject"
+>;
 
 export function isoWeekday(date: string): number {
   if (!isCalendarDate(date)) throw new DomainError(`${date} is not a valid date`);
@@ -69,6 +75,15 @@ function normaliseHours(hours: WorkingHours[]): WorkingHours[] {
   return sorted;
 }
 
+function normaliseSubject(subject: string | null): string | null {
+  const trimmed = subject?.trim() ?? "";
+  if (trimmed === "") return null;
+  if (trimmed.length < 3 || trimmed.length > 255 || /\s/.test(trimmed)) {
+    throw new DomainError("The account ID must be 3 to 255 characters without spaces");
+  }
+  return trimmed;
+}
+
 function validateTerms(terms: CoachTerms): CoachTerms {
   const fullName = terms.fullName.trim().replace(/\s+/g, " ");
   if (fullName.length < 2 || fullName.length > 120) {
@@ -78,14 +93,23 @@ function validateTerms(terms: CoachTerms): CoachTerms {
   if (specialization.length < 2 || specialization.length > 80) {
     throw new DomainError("Specialization must be between 2 and 80 characters");
   }
-  return { fullName, specialization, weeklyHours: normaliseHours(terms.weeklyHours) };
+  return {
+    fullName,
+    specialization,
+    weeklyHours: normaliseHours(terms.weeklyHours),
+    authSubject: normaliseSubject(terms.authSubject),
+  };
 }
 
 export class Coach {
   private constructor(private snapshot: CoachSnapshot) {}
 
   static create(input: NewCoach, id: string = randomUUID()): Coach {
-    const terms = validateTerms({ ...input, weeklyHours: input.weeklyHours ?? [] });
+    const terms = validateTerms({
+      ...input,
+      weeklyHours: input.weeklyHours ?? [],
+      authSubject: input.authSubject ?? null,
+    });
     return new Coach({ id, ...terms, archived: false, version: 1 });
   }
 
@@ -121,6 +145,8 @@ export class Coach {
       fullName: changes.fullName ?? this.snapshot.fullName,
       specialization: changes.specialization ?? this.snapshot.specialization,
       weeklyHours: changes.weeklyHours ?? this.snapshot.weeklyHours,
+      authSubject:
+        changes.authSubject === undefined ? this.snapshot.authSubject : changes.authSubject,
     });
     this.snapshot = { ...this.snapshot, ...terms };
   }

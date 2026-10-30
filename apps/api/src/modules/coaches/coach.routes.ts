@@ -1,8 +1,9 @@
 import { coachChanges, coachView, id, newCoach } from "@gymdesk/shared";
-import type { FastifyPluginAsync } from "fastify";
+import type { FastifyPluginAsync, FastifyRequest } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import type { RoleGuard } from "../../platform/auth.js";
+import type { CoachSnapshot } from "./coach.js";
 import type { CoachService } from "./coach.service.js";
 
 export interface CoachRoutesOptions {
@@ -11,6 +12,10 @@ export interface CoachRoutesOptions {
 }
 
 const idParams = z.object({ id });
+
+function forReader(request: FastifyRequest, coach: CoachSnapshot): CoachSnapshot {
+  return request.auth?.roles.includes("admin") ? coach : { ...coach, authSubject: null };
+}
 
 export const coachRoutes: FastifyPluginAsync<CoachRoutesOptions> = async (
   app,
@@ -29,13 +34,16 @@ export const coachRoutes: FastifyPluginAsync<CoachRoutesOptions> = async (
         response: { 200: z.array(coachView) },
       },
     },
-    async (request) => service.list({ includeArchived: request.query.includeArchived }),
+    async (request) =>
+      (await service.list({ includeArchived: request.query.includeArchived })).map((coach) =>
+        forReader(request, coach),
+      ),
   );
 
   api.get(
     "/api/coaches/:id",
     { preHandler: anyStaff, schema: { params: idParams, response: { 200: coachView } } },
-    async (request) => service.get(request.params.id),
+    async (request) => forReader(request, await service.get(request.params.id)),
   );
 
   api.post(

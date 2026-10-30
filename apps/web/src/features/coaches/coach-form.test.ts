@@ -5,6 +5,7 @@ const valid = {
   fullName: "Ivan Petrenko",
   specialization: "Strength training",
   weeklyHours: [{ weekday: "1", from: "08:00", to: "12:00" }],
+  authSubject: "",
 };
 
 function issuesOf(values: unknown) {
@@ -57,12 +58,29 @@ describe("coachFormSchema", () => {
   });
 });
 
+describe("account id", () => {
+  it("accepts a blank id and a normal one", () => {
+    expect(coachFormSchema.safeParse({ ...valid, authSubject: "" }).success).toBe(true);
+    expect(coachFormSchema.safeParse({ ...valid, authSubject: "auth0|64f2c1" }).success).toBe(true);
+  });
+
+  it("rejects spaces and ids that are too short", () => {
+    expect(issuesOf({ ...valid, authSubject: "auth0|a b" })).toEqual([
+      "authSubject: The account ID must not contain spaces",
+    ]);
+    expect(issuesOf({ ...valid, authSubject: "ab" })).toEqual([
+      "authSubject: The account ID is too short",
+    ]);
+  });
+});
+
 describe("conversions", () => {
   it("turns weekdays into numbers for the api and back into text for the form", () => {
     expect(toCoachInput({ ...valid, fullName: " Ivan Petrenko " })).toEqual({
       fullName: "Ivan Petrenko",
       specialization: "Strength training",
       weeklyHours: [{ weekday: 1, from: "08:00", to: "12:00" }],
+      authSubject: null,
     });
     expect(
       formValuesOf({
@@ -72,7 +90,21 @@ describe("conversions", () => {
         fullName: "Ivan Petrenko",
         specialization: "Strength training",
         weeklyHours: [{ weekday: 1, from: "08:00", to: "12:00" }],
+        authSubject: null,
       }),
     ).toEqual(valid);
+  });
+
+  it("sends a typed account id trimmed and an empty one as null", () => {
+    expect(toCoachInput({ ...valid, authSubject: " auth0|abc " }).authSubject).toBe("auth0|abc");
+    expect(toCoachInput({ ...valid, authSubject: "  " }).authSubject).toBeNull();
+    expect(
+      formValuesOf({
+        id: "c1",
+        archived: false,
+        version: 1,
+        ...toCoachInput({ ...valid, authSubject: "auth0|abc" }),
+      }).authSubject,
+    ).toBe("auth0|abc");
   });
 });

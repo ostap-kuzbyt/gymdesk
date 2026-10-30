@@ -71,6 +71,39 @@ describe("Coach.create", () => {
   });
 });
 
+describe("coach sign-in account", () => {
+  it("has none by default", () => {
+    expect(Coach.create(profile).toSnapshot().authSubject).toBeNull();
+  });
+
+  it("keeps a trimmed account id", () => {
+    const coach = Coach.create({ ...profile, authSubject: "  auth0|abc123  " });
+    expect(coach.toSnapshot().authSubject).toBe("auth0|abc123");
+  });
+
+  it("treats a blank id as no account", () => {
+    expect(Coach.create({ ...profile, authSubject: "   " }).toSnapshot().authSubject).toBeNull();
+  });
+
+  it("rejects ids that are too short or contain spaces", () => {
+    expect(() => Coach.create({ ...profile, authSubject: "ab" })).toThrow(DomainError);
+    expect(() => Coach.create({ ...profile, authSubject: "auth0|a b" })).toThrow(DomainError);
+  });
+
+  it("can be changed, cleared and left alone", () => {
+    const coach = Coach.create({ ...profile, authSubject: "auth0|first" });
+
+    coach.change({ fullName: "Ivan P." });
+    expect(coach.toSnapshot().authSubject).toBe("auth0|first");
+
+    coach.change({ authSubject: "auth0|second" });
+    expect(coach.toSnapshot().authSubject).toBe("auth0|second");
+
+    coach.change({ authSubject: null });
+    expect(coach.toSnapshot().authSubject).toBeNull();
+  });
+});
+
 describe("Coach.change and archive", () => {
   it("replaces the weekly hours as a whole and keeps the rest", () => {
     const coach = Coach.create({

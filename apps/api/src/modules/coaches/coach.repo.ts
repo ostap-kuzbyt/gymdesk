@@ -12,6 +12,7 @@ function toEntity(row: CoachRow): Coach {
     fullName: row.fullName,
     specialization: row.specialization,
     weeklyHours: row.weeklyHours,
+    authSubject: row.authSubject,
     archived: row.archived,
     version: row.version,
   });
@@ -20,6 +21,11 @@ function toEntity(row: CoachRow): Coach {
 export const coachRepo = {
   async findById(db: Executor, id: string): Promise<Coach | undefined> {
     const [row] = await db.select().from(coaches).where(eq(coaches.id, id));
+    return row && toEntity(row);
+  },
+
+  async findByAuthSubject(db: Executor, subject: string): Promise<Coach | undefined> {
+    const [row] = await db.select().from(coaches).where(eq(coaches.authSubject, subject));
     return row && toEntity(row);
   },
 

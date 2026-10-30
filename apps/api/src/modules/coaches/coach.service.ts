@@ -19,6 +19,11 @@ export class CoachService {
     return coach.toSnapshot();
   }
 
+  async idOfSubject(subject: string): Promise<string | null> {
+    const coach = await coachRepo.findByAuthSubject(this.db, subject);
+    return coach && !coach.archived ? coach.id : null;
+  }
+
   async requireActive(id: string): Promise<void> {
     const coach = await this.get(id);
     if (coach.archived) throw new DomainError("The coach has been archived");

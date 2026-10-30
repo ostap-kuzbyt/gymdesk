@@ -9,6 +9,7 @@ interface Coach {
   id: string;
   fullName: string;
   specialization: string;
+  authSubject: string | null;
   weeklyHours: { weekday: number; from: string; to: string }[];
   archived: boolean;
   version: number;
@@ -18,6 +19,7 @@ const ivan: Coach = {
   id: "6f1d7a52-2f0f-4a43-9a53-5d9b1a9b2001",
   fullName: "Ivan Petrenko",
   specialization: "Strength training",
+  authSubject: null,
   weeklyHours: [1, 2, 3, 4, 5].map((weekday) => ({ weekday, from: "07:00", to: "13:00" })),
   archived: false,
   version: 1,
@@ -26,6 +28,7 @@ const olha: Coach = {
   id: "6f1d7a52-2f0f-4a43-9a53-5d9b1a9b2002",
   fullName: "Olha Koval",
   specialization: "Yoga and stretching",
+  authSubject: null,
   weeklyHours: [
     { weekday: 1, from: "09:00", to: "15:00" },
     { weekday: 6, from: "10:00", to: "14:00" },
@@ -37,6 +40,7 @@ const retired: Coach = {
   id: "6f1d7a52-2f0f-4a43-9a53-5d9b1a9b2003",
   fullName: "Retired Coach",
   specialization: "Boxing",
+  authSubject: null,
   weeklyHours: [],
   archived: true,
   version: 3,
@@ -166,6 +170,7 @@ describe("adding a coach", () => {
       fullName: "Sofiia Marchuk",
       specialization: "Boxing",
       weeklyHours: [{ weekday: 4, from: "16:00", to: "21:00" }],
+      authSubject: null,
     });
     expect((await screen.findAllByText("Thu 16:00–21:00")).length).toBeGreaterThan(0);
   });
