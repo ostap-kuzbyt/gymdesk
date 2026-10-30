@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: gymdesk-api
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: AUTH0_DOMAIN
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: AUTH0_AUDIENCE
+        value: https://api.gymdesk
+      - key: AUTH0_ROLES_CLAIM
+        value: https://gymdesk/roles
+      - key: CLUB_TIMEZONE
+        value: Europe/Kyiv
+      - key: MIGRATE_ON_START
+        value: "true"
