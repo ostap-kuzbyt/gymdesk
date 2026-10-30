@@ -12,6 +12,7 @@ import { useCheckIn } from "@/features/use-check-in";
 import { useCancelSubscription, useMember } from "@/features/members/api";
 import { CoachSelect } from "@/features/members/coach-select";
 import { EditMemberDialog } from "@/features/members/edit-member-dialog";
+import { SendReminderDialog } from "@/features/reminders/send-reminder-dialog";
 import { SellSubscriptionDialog } from "@/features/members/sell-subscription-dialog";
 import { SubscriptionsTable } from "@/features/members/subscriptions-table";
 import { VisitsTable } from "@/features/members/visits-table";
@@ -62,6 +63,7 @@ function MemberProfile({ member }: { member: MemberView }) {
   const frontDesk = isFrontDesk(roles);
   const [editing, setEditing] = useState(false);
   const [selling, setSelling] = useState(false);
+  const [reminding, setReminding] = useState(false);
   const [toCancel, setToCancel] = useState<SubscriptionView | null>(null);
   const cancel = useCancelSubscription(member.id);
   const { checkIn, isPending } = useCheckIn();
@@ -86,6 +88,9 @@ function MemberProfile({ member }: { member: MemberView }) {
           actions={
             frontDesk ? (
               <>
+                <Button variant="outline" onClick={() => setReminding(true)}>
+                  Send reminder
+                </Button>
                 <Button variant="outline" onClick={() => setEditing(true)}>
                   Edit profile
                 </Button>
@@ -169,6 +174,11 @@ function MemberProfile({ member }: { member: MemberView }) {
       </div>
 
       <EditMemberDialog open={editing} onOpenChange={setEditing} member={member} />
+      <SendReminderDialog
+        open={reminding}
+        onOpenChange={setReminding}
+        member={{ id: member.id, fullName: member.fullName }}
+      />
       <SellSubscriptionDialog open={selling} onOpenChange={setSelling} member={member} />
       <ConfirmDialog
         open={toCancel !== null}

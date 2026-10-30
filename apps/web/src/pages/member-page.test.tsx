@@ -261,3 +261,52 @@ describe("coach", () => {
     expect(await screen.findByText("The coach has been archived")).toBeInTheDocument();
   });
 });
+
+describe("sending a reminder", () => {
+  it("opens the dialog with the member already chosen", async () => {
+    const state = baseMember();
+    const api = profileApi(state, {
+      overrides: {
+        "POST /api/members/:id/reminders": () =>
+          json(
+            {
+              id: "6f1d7a52-2f0f-4a43-9a53-5d9b1a9b0888",
+              memberId: MEMBER_ID,
+              memberName: "Olena Shevchenko",
+              subscriptionId: ACTIVE_SUB,
+              kind: "expiry",
+              trigger: "manual",
+              email: "olena@example.com",
+              status: "sent",
+              attempts: 1,
+              error: null,
+              createdAt: new Date().toISOString(),
+              sentAt: new Date().toISOString(),
+            },
+            201,
+          ),
+      },
+    });
+    const { user } = await openProfile(api, state);
+
+    await user.click(screen.getByRole("button", { name: "Send reminder" }));
+    const dialog = await screen.findByRole("dialog", { name: "Send a reminder" });
+
+    expect(within(dialog).getByText("Olena Shevchenko")).toBeInTheDocument();
+    expect(within(dialog).queryByRole("searchbox")).not.toBeInTheDocument();
+    expect(within(dialog).queryByRole("button", { name: "Change" })).not.toBeInTheDocument();
+
+    await user.click(within(dialog).getByRole("button", { name: "Send reminder" }));
+    expect(await screen.findByText("Reminder sent to Olena Shevchenko")).toBeInTheDocument();
+    expect(api.calls("POST", `/api/members/${MEMBER_ID}/reminders`)[0]?.body).toEqual({
+      kind: "expiry",
+    });
+  });
+
+  it("is not offered to coaches", async () => {
+    const state = baseMember();
+    await openProfile(profileApi(state), state, { roles: ["coach"] });
+
+    expect(screen.queryByRole("button", { name: "Send reminder" })).not.toBeInTheDocument();
+  });
+});

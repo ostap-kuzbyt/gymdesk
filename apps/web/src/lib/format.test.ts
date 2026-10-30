@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   formatDate,
+  formatDateTime,
   formatMoney,
   formatPeriod,
   formatTerm,
@@ -56,5 +57,13 @@ describe("formatTime", () => {
     const instant = new Date(2026, 9, 21, 9, 5).toISOString();
 
     expect(formatTime(instant)).toBe("09:05");
+  });
+});
+
+describe("formatDateTime", () => {
+  it("shows the local day and time together", () => {
+    const instant = new Date(2026, 9, 21, 9, 5).toISOString();
+
+    expect(formatDateTime(instant)).toBe("21 Oct 2026, 09:05");
   });
 });

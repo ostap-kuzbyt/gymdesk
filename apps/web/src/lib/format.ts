@@ -37,3 +37,13 @@ export function formatTime(isoInstant: string): string {
 export function formatPeriod(startsOn: string, endsOn: string): string {
   return `${formatDate(startsOn)} – ${formatDate(endsOn)}`;
 }
+
+export function formatDateTime(isoInstant: string): string {
+  const instant = new Date(isoInstant);
+  const day = new Intl.DateTimeFormat("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(instant);
+  return `${formatDate(day)}, ${formatTime(isoInstant)}`;
+}

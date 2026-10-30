@@ -10,6 +10,7 @@ import { MemberPage } from "@/pages/member-page";
 import { MembersPage } from "@/pages/members-page";
 import { mondayOf } from "@/lib/week";
 import { PlaceholderPage } from "@/pages/placeholder-page";
+import { RemindersPage } from "@/pages/reminders-page";
 import { SchedulePage } from "@/pages/schedule-page";
 import { WorkoutPage } from "@/pages/workout-page";
 import { StudiosPage } from "@/pages/studios-page";
@@ -69,7 +70,28 @@ const routeTree = rootRoute.addChildren([
     path: "workouts/$workoutId",
     component: WorkoutPage,
   }),
-  page("reminders", "Reminders"),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "reminders",
+    component: RemindersPage,
+    validateSearch: (
+      search: Record<string, unknown>,
+    ): {
+      status?: "pending" | "sent" | "failed" | undefined;
+      kind?: "expiry" | "promo" | undefined;
+      page?: number | undefined;
+    } => {
+      const page = Number(search.page);
+      return {
+        status:
+          search.status === "pending" || search.status === "sent" || search.status === "failed"
+            ? search.status
+            : undefined,
+        kind: search.kind === "expiry" || search.kind === "promo" ? search.kind : undefined,
+        page: Number.isInteger(page) && page > 1 ? page : undefined,
+      };
+    },
+  }),
   page("reports", "Reports"),
   createRoute({ getParentRoute: () => rootRoute, path: "tariffs", component: TariffsPage }),
   createRoute({ getParentRoute: () => rootRoute, path: "studios", component: StudiosPage }),
