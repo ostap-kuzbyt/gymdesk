@@ -16,6 +16,8 @@ import type { SeriesPoint } from "./shape";
 
 const AXIS = { fill: "var(--muted-foreground)", fontSize: 12 };
 const GRID = "var(--border)";
+const AXIS_LINE = "var(--input)";
+const HOVER_CURSOR = { fill: "var(--foreground)", fillOpacity: 0.08 };
 const SERIES_COLORS = [
   "var(--plate-blue)",
   "var(--plate-green)",
@@ -23,6 +25,10 @@ const SERIES_COLORS = [
   "var(--plate-red)",
   "var(--muted-foreground)",
 ];
+
+function legendLabel(value: string) {
+  return <span className="text-foreground">{value}</span>;
+}
 
 export function seriesColor(index: number): string {
   return SERIES_COLORS[index % SERIES_COLORS.length] ?? "var(--plate-blue)";
@@ -84,10 +90,10 @@ export function RevenueChart({
     <Frame label={label}>
       <BarChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
         <CartesianGrid stroke={GRID} vertical={false} />
-        <XAxis dataKey="name" tick={AXIS} tickLine={false} axisLine={{ stroke: GRID }} />
+        <XAxis dataKey="name" tick={AXIS} tickLine={false} axisLine={{ stroke: AXIS_LINE }} />
         <YAxis tick={AXIS} tickLine={false} axisLine={false} width={56} />
         <Tooltip
-          cursor={{ fill: "var(--muted)" }}
+          cursor={HOVER_CURSOR}
           content={({ active, payload }: TooltipContentProps) => {
             const point = payload?.[0]?.payload as (typeof data)[number] | undefined;
             if (!active || !point) return null;
@@ -134,13 +140,13 @@ export function CoachHoursChart({
           dataKey="date"
           tick={AXIS}
           tickLine={false}
-          axisLine={{ stroke: GRID }}
+          axisLine={{ stroke: AXIS_LINE }}
           tickFormatter={(value: string) => String(Number(value.slice(8)))}
           interval="preserveStartEnd"
         />
         <YAxis tick={AXIS} tickLine={false} axisLine={false} width={40} unit=" h" />
         <Tooltip
-          cursor={{ fill: "var(--muted)" }}
+          cursor={HOVER_CURSOR}
           content={({ active, label: date, payload }: TooltipContentProps) => {
             if (!active || !payload) return null;
             const lines = payload
@@ -158,7 +164,7 @@ export function CoachHoursChart({
             );
           }}
         />
-        <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
+        <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} formatter={legendLabel} />
         {series.map((item, index) => (
           <Bar
             key={item.id}
@@ -166,6 +172,9 @@ export function CoachHoursChart({
             name={item.name}
             stackId="hours"
             fill={seriesColor(index)}
+            stroke="var(--card)"
+            strokeWidth={1.5}
+            isAnimationActive={false}
           />
         ))}
       </BarChart>
@@ -188,13 +197,13 @@ export function StudioBookingsChart({
           dataKey="date"
           tick={AXIS}
           tickLine={false}
-          axisLine={{ stroke: GRID }}
+          axisLine={{ stroke: AXIS_LINE }}
           tickFormatter={(value: string) => String(Number(value.slice(8)))}
           interval="preserveStartEnd"
         />
         <YAxis tick={AXIS} tickLine={false} axisLine={false} width={40} />
         <Tooltip
-          cursor={{ fill: "var(--muted)" }}
+          cursor={HOVER_CURSOR}
           content={({ active, label: date, payload }: TooltipContentProps) => {
             const point = payload?.[0]?.payload as { booked: number; capacity: number } | undefined;
             if (!active || !point) return null;
@@ -213,12 +222,15 @@ export function StudioBookingsChart({
             );
           }}
         />
-        <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
+        <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} formatter={legendLabel} />
         <Bar
           dataKey="capacity"
           name="Places offered"
           fill="var(--muted-foreground)"
           fillOpacity={0.35}
+          stroke="var(--muted-foreground)"
+          strokeWidth={1.5}
+          isAnimationActive={false}
         />
         <Bar dataKey="booked" name="Booked" fill="var(--plate-green)" isAnimationActive={false} />
       </BarChart>

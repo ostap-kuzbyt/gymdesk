@@ -188,12 +188,12 @@ export function SchedulePage() {
                             <Link
                               to="/workouts/$workoutId"
                               params={{ workoutId: workout.id }}
-                              className="relative block rounded-md bg-card py-2 pr-2.5 pl-3.5 text-sm hover:bg-accent focus-visible:outline-2"
+                              className="relative block rounded-md border border-input bg-card py-2 pr-2.5 pl-3.5 text-sm hover:border-primary hover:bg-accent focus-visible:outline-2"
                             >
                               <span
                                 aria-hidden
                                 className={cn(
-                                  "absolute inset-y-0 left-0 w-1 rounded-l-md",
+                                  "absolute -inset-y-px -left-px w-1 rounded-l-md",
                                   FILL_BAR[fill.tone],
                                 )}
                               />
