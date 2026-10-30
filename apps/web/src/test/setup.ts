@@ -32,3 +32,17 @@ window.scrollTo = vi.fn();
 Element.prototype.scrollIntoView = vi.fn();
 Element.prototype.hasPointerCapture = vi.fn(() => false);
 Element.prototype.releasePointerCapture = vi.fn();
+
+vi.mock("recharts", async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
+  const React = await import("react");
+  return {
+    ...actual,
+    ResponsiveContainer: ({ children }: { children: React.ReactElement }) =>
+      React.createElement(
+        "div",
+        { style: { width: 800, height: 300 } },
+        React.cloneElement(children, { width: 800, height: 300 } as object),
+      ),
+  };
+});

@@ -18,7 +18,7 @@ import { ROLE_LABELS, navFor } from "@/nav";
 import { usePalette } from "@/palette/palette-context";
 
 const tabClass =
-  "relative flex h-14 items-center px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:-outline-offset-2";
+  "relative flex h-14 items-center px-3 text-sm font-medium whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:-outline-offset-2";
 const activeTabClass =
   "text-foreground after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:bg-primary";
 

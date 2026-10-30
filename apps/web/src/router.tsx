@@ -11,6 +11,7 @@ import { MembersPage } from "@/pages/members-page";
 import { mondayOf } from "@/lib/week";
 import { PlaceholderPage } from "@/pages/placeholder-page";
 import { RemindersPage } from "@/pages/reminders-page";
+import { ReportsPage } from "@/pages/reports-page";
 import { SchedulePage } from "@/pages/schedule-page";
 import { WorkoutPage } from "@/pages/workout-page";
 import { StudiosPage } from "@/pages/studios-page";
@@ -92,7 +93,31 @@ const routeTree = rootRoute.addChildren([
       };
     },
   }),
-  page("reports", "Reports"),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "reports",
+    component: ReportsPage,
+    validateSearch: (
+      search: Record<string, unknown>,
+    ): {
+      tab?: "attendance" | "revenue" | "load" | undefined;
+      from?: string | undefined;
+      to?: string | undefined;
+      granularity?: "month" | "year" | undefined;
+      page?: number | undefined;
+    } => {
+      const page = Number(search.page);
+      const date = (value: unknown) =>
+        typeof value === "string" && isCalendarDate(value) ? value : undefined;
+      return {
+        tab: search.tab === "revenue" || search.tab === "load" ? search.tab : undefined,
+        from: date(search.from),
+        to: date(search.to),
+        granularity: search.granularity === "year" ? "year" : undefined,
+        page: Number.isInteger(page) && page > 1 ? page : undefined,
+      };
+    },
+  }),
   createRoute({ getParentRoute: () => rootRoute, path: "tariffs", component: TariffsPage }),
   createRoute({ getParentRoute: () => rootRoute, path: "studios", component: StudiosPage }),
   createRoute({ getParentRoute: () => rootRoute, path: "coaches", component: CoachesPage }),
