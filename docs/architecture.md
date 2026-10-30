@@ -143,6 +143,7 @@ erDiagram
         text full_name
         text specialization
         jsonb weekly_hours
+        text auth_subject UK "Auth0 user id, optional"
     }
     studios {
         uuid id PK
@@ -187,6 +188,7 @@ Rules that must never break are enforced by PostgreSQL as well as by the entitie
 | A coach leads one workout at a time                          | `EXCLUDE USING gist` on `coach_id` and the time range     |
 | A member holds at most one active reservation per workout    | partial unique index where `cancelled_at is null`         |
 | The daily scan reminds about a subscription once             | partial unique index on `subscription_id` for scan-expiry |
+| One sign-in account belongs to at most one coach             | unique index on `auth_subject`                            |
 | Prices, durations and capacities stay in range               | `CHECK` constraints                                       |
 
 The repos translate a violated constraint into a `ConflictError`, which the HTTP layer turns into a 409 with a readable message. Subscriptions copy price and visit limit from the tariff when they are sold, so editing or archiving a tariff never changes what a member already paid for.
@@ -270,6 +272,8 @@ sequenceDiagram
 ```
 
 The web app hides what a role cannot use, but only the API decides: every route declares its allowed roles, and a missing or invalid token is a 401, a valid token without the right role a 403. A 401 in the browser sends the user back to login.
+
+A coach is further scoped to their own records. `platform/scope.ts` turns the token into a scope: admin and reception see the whole club, a coach sees what belongs to the coach profile whose `auth_subject` equals the token's subject. The member and workout routes apply it, filtering lists and answering 403 for a record that belongs to someone else, and an account without a profile sees nothing. `GET /api/me` tells the web app which profile the account is linked to, so it can explain an empty view instead of leaving the coach guessing.
 
 ## Web structure
 

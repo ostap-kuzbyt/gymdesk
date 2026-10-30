@@ -111,17 +111,19 @@ Sign-in and roles come from Auth0. Nothing about users is stored in the Gymdesk 
 
    Use the same claim name in `AUTH0_ROLES_CLAIM` and `VITE_AUTH0_ROLES_CLAIM`.
 
+6. **Coach accounts**. A coach sees only their own schedule and members, so their Auth0 user has to be linked to a coach profile. Open the user in _User Management → Users_ and copy the user ID (`auth0|…`). In Gymdesk, an admin opens _Club → Coaches_, edits the coach and pastes it into _Sign-in account ID_. Until that is done the coach sees an empty app with a notice that shows the ID to hand over.
+
 ## Demo data and demo users
 
 `db:seed` creates tariffs, four studios, five coaches, forty members with subscriptions, 120 days of check-ins, workouts with reservations and a history of reminders. Dates are relative to today, so reports and the dashboard are never empty. The data is deterministic: the same `--seed` produces the same club.
 
 Create three users in Auth0 to see every role (the addresses are only examples):
 
-| User                 | Role        | What they see                                                                       |
-| -------------------- | ----------- | ----------------------------------------------------------------------------------- |
-| `admin@gymdesk.test` | `admin`     | Everything: tariffs, studios, coaches, revenue report                               |
-| `desk@gymdesk.test`  | `reception` | Members, subscriptions, check-ins, schedule, reminders, reports                     |
-| `coach@gymdesk.test` | `coach`     | Dashboard, members, schedule and club pages, no check-in desk, reminders or reports |
+| User                 | Role        | What they see                                                                      |
+| -------------------- | ----------- | ---------------------------------------------------------------------------------- |
+| `admin@gymdesk.test` | `admin`     | Everything: tariffs, studios, coaches, revenue report                              |
+| `desk@gymdesk.test`  | `reception` | Members, subscriptions, check-ins, schedule, reminders, reports                    |
+| `coach@gymdesk.test` | `coach`     | Their own workouts and assigned members once linked to a coach profile, club pages |
 
 ## Repository layout
 

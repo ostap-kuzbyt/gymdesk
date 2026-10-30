@@ -44,7 +44,9 @@ Gymdesk is a management system for a fitness club. Front-desk staff, coaches and
 | --------- | ---------------------------------------------------------- |
 | admin     | everything, including tariffs, studios and coaches         |
 | reception | members, subscriptions, check-ins, reservations, reminders |
-| coach     | own schedule, read-only                                    |
+| coach     | own schedule and assigned members, read-only               |
+
+A coach signs in with their own account. An admin links that account to the coach profile, and from then on the coach sees only their own workouts and the members assigned to them. An account that is not linked sees nothing.
 
 ## Out of scope
 
