@@ -18,7 +18,7 @@ import { useMemberSearch } from "@/features/members/api";
 import { RegisterMemberDialog } from "@/features/members/register-member-dialog";
 import { ActiveUntil } from "@/features/members/subscription-plate";
 import { useDebouncedValue } from "@/lib/use-debounced-value";
-import { isFrontDesk } from "@/lib/permissions";
+import { isCoachOnly, isFrontDesk } from "@/lib/permissions";
 
 const PAGE_SIZE = 25;
 const membersRoute = getRouteApi("/members");
@@ -60,7 +60,9 @@ export function MembersPage() {
     <section>
       <PageHeader
         title="Members"
-        description="Everyone who trains at the club."
+        description={
+          isCoachOnly(roles) ? "The members assigned to you." : "Everyone who trains at the club."
+        }
         actions={registerButton}
       />
 

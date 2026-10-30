@@ -22,7 +22,8 @@ import { ActiveUntil } from "@/features/members/subscription-plate";
 import { ApiError } from "@/lib/api";
 import { messageOf } from "@/lib/errors";
 import { WEEKDAY_LONG, windowsOnDay } from "@/lib/hours";
-import { isAdmin } from "@/lib/permissions";
+import { useMe } from "@/features/account/api";
+import { isAdmin, isCoachOnly } from "@/lib/permissions";
 
 const coachRoute = getRouteApi("/coaches/$coachId");
 const PAGE_SIZE = 10;
@@ -55,6 +56,9 @@ export function CoachPage() {
 function CoachProfile({ coach }: { coach: CoachView }) {
   const { roles } = useSession();
   const canEdit = isAdmin(roles) && !coach.archived;
+  const coachOnly = isCoachOnly(roles);
+  const me = useMe(coachOnly);
+  const ownProfile = !coachOnly || me.data?.coachId === coach.id;
   const [editing, setEditing] = useState(false);
   const [archiving, setArchiving] = useState(false);
   const archive = useArchiveCoach();
@@ -109,7 +113,12 @@ function CoachProfile({ coach }: { coach: CoachView }) {
         </dl>
       </div>
 
-      <AssignedMembers coachId={coach.id} />
+      {ownProfile ? <AssignedMembers coachId={coach.id} /> : null}
+      {coachOnly && me.data && !ownProfile ? (
+        <p className="text-muted-foreground">
+          Only the front desk and this coach can see the members assigned to them.
+        </p>
+      ) : null}
 
       <CoachDialog open={editing} onOpenChange={setEditing} coach={coach} />
       <ConfirmDialog

@@ -12,7 +12,7 @@ import { fillOf } from "@/features/workouts/capacity";
 import { useStudios } from "@/features/studios/api";
 import { useWorkouts } from "@/features/workouts/api";
 import { WorkoutDialog } from "@/features/workouts/workout-dialog";
-import { isFrontDesk } from "@/lib/permissions";
+import { isCoachOnly, isFrontDesk } from "@/lib/permissions";
 import { addDays } from "@/lib/dates";
 import { formatDate, todayLocal } from "@/lib/format";
 import { WEEKDAY_SHORT } from "@/lib/hours";
@@ -125,23 +125,25 @@ export function SchedulePage() {
               </NativeSelectOption>
             ))}
         </NativeSelect>
-        <NativeSelect
-          size="sm"
-          aria-label="Coach"
-          value={search.coach ?? ""}
-          onChange={(event) =>
-            go({ ...search, week: monday, coach: event.target.value || undefined })
-          }
-        >
-          <NativeSelectOption value="">All coaches</NativeSelectOption>
-          {coaches.data
-            ?.filter((coach) => !coach.archived)
-            .map((coach) => (
-              <NativeSelectOption key={coach.id} value={coach.id}>
-                {coach.fullName}
-              </NativeSelectOption>
-            ))}
-        </NativeSelect>
+        {isCoachOnly(roles) ? null : (
+          <NativeSelect
+            size="sm"
+            aria-label="Coach"
+            value={search.coach ?? ""}
+            onChange={(event) =>
+              go({ ...search, week: monday, coach: event.target.value || undefined })
+            }
+          >
+            <NativeSelectOption value="">All coaches</NativeSelectOption>
+            {coaches.data
+              ?.filter((coach) => !coach.archived)
+              .map((coach) => (
+                <NativeSelectOption key={coach.id} value={coach.id}>
+                  {coach.fullName}
+                </NativeSelectOption>
+              ))}
+          </NativeSelect>
+        )}
       </div>
 
       {workouts.isPending ? <TableSkeleton columns={4} rows={4} /> : null}

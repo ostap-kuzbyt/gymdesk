@@ -64,6 +64,13 @@ export const handlers = [
     ),
   ),
 
+  get("/api/me", () =>
+    HttpResponse.json({
+      subject: "auth0|tester",
+      roles: ["coach"],
+      coachId: data.coaches[0]?.id ?? null,
+    }),
+  ),
   get("/api/coaches", () => HttpResponse.json(data.coaches)),
   get("/api/coaches/:id", ({ params }) => {
     const coach = data.coaches.find((item) => item.id === params.id);
