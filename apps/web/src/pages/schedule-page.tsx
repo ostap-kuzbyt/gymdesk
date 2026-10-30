@@ -170,7 +170,9 @@ export function SchedulePage() {
                   <h2
                     className={cn(
                       "mb-2 flex items-baseline gap-1.5 border-b pb-1.5 text-base",
-                      isToday ? "border-primary text-primary" : "border-border",
+                      isToday
+                        ? "border-primary bg-primary px-2 text-primary-foreground"
+                        : "border-border",
                     )}
                     aria-current={isToday ? "date" : undefined}
                   >
