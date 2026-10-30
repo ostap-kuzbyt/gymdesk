@@ -11,10 +11,11 @@ export interface ReminderFilter {
   limit: number;
 }
 
-export function useReminders(filter: ReminderFilter) {
+export function useReminders(filter: ReminderFilter, enabled = true) {
   const api = useApi();
   return useQuery({
     queryKey: [...reminderKeys.all, "list", filter],
+    enabled,
     queryFn: () =>
       api.get(reminderPage, "/api/reminders", {
         status: filter.status,

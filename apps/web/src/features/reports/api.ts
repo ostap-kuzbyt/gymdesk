@@ -4,15 +4,14 @@ import { useApi } from "@/lib/api-context";
 
 export const reportKeys = { all: ["reports"] as const };
 
-export function useAttendance(options: {
-  from: string;
-  to: string;
-  limit: number;
-  offset: number;
-}) {
+export function useAttendance(
+  options: { from: string; to: string; limit: number; offset: number },
+  enabled = true,
+) {
   const api = useApi();
   return useQuery({
     queryKey: [...reportKeys.all, "attendance", options],
+    enabled,
     queryFn: () => api.get(attendanceReport, "/api/reports/attendance", options),
     placeholderData: keepPreviousData,
   });

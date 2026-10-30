@@ -94,3 +94,12 @@ export function useCancelSubscription(memberId: string) {
     onSettled: () => queryClient.invalidateQueries({ queryKey: memberKeys.all }),
   });
 }
+
+export function useExpiringMembers(withinDays: number) {
+  const api = useApi();
+  return useQuery({
+    queryKey: [...memberKeys.all, "expiring", withinDays],
+    queryFn: () =>
+      api.get(memberPage, "/api/members", { expiringWithinDays: withinDays, limit: 50, offset: 0 }),
+  });
+}

@@ -9,22 +9,15 @@ import { CoachesPage } from "@/pages/coaches-page";
 import { MemberPage } from "@/pages/member-page";
 import { MembersPage } from "@/pages/members-page";
 import { mondayOf } from "@/lib/week";
-import { PlaceholderPage } from "@/pages/placeholder-page";
 import { RemindersPage } from "@/pages/reminders-page";
 import { ReportsPage } from "@/pages/reports-page";
 import { SchedulePage } from "@/pages/schedule-page";
 import { WorkoutPage } from "@/pages/workout-page";
 import { StudiosPage } from "@/pages/studios-page";
+import { TodayPage } from "@/pages/today-page";
 import { TariffsPage } from "@/pages/tariffs-page";
 
 const rootRoute = createRootRoute({ component: AppLayout, notFoundComponent: NotFound });
-
-const page = (path: string, title: string) =>
-  createRoute({
-    getParentRoute: () => rootRoute,
-    path,
-    component: () => <PlaceholderPage title={title} />,
-  });
 
 const memberRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -33,7 +26,7 @@ const memberRoute = createRoute({
 });
 
 const routeTree = rootRoute.addChildren([
-  page("/", "Today"),
+  createRoute({ getParentRoute: () => rootRoute, path: "/", component: TodayPage }),
   createRoute({ getParentRoute: () => rootRoute, path: "check-in", component: CheckInDeskPage }),
   createRoute({
     getParentRoute: () => rootRoute,

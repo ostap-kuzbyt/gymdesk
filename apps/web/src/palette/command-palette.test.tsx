@@ -129,12 +129,14 @@ describe("members", () => {
 
     await user.type(screen.getByRole("combobox"), "o");
     await new Promise((resolve) => setTimeout(resolve, 300));
-    expect(fetchMock).not.toHaveBeenCalled();
+    const searches = () =>
+      fetchMock.mock.calls.filter(([url]) => String(url).startsWith("/api/members?q="));
+    expect(searches()).toHaveLength(0);
 
     await user.type(screen.getByRole("combobox"), "le");
-    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    await waitFor(() => expect(searches()).toHaveLength(1));
 
-    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    const [url, init] = searches()[0] as unknown as [string, RequestInit];
     expect(url).toBe("/api/members?q=ole&limit=5");
     expect(init.headers).toMatchObject({ authorization: "Bearer test-token" });
   });
