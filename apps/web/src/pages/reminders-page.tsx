@@ -168,7 +168,9 @@ export function RemindersPage() {
                       >
                         {reminder.memberName}
                       </Link>
-                      <div className="text-xs text-muted-foreground">{reminder.email}</div>
+                      <div className="text-xs break-all text-muted-foreground">
+                        {reminder.email}
+                      </div>
                       <div className="text-xs text-muted-foreground sm:hidden">
                         {KIND_LABELS[reminder.kind]} ·{" "}
                         {formatDateTime(reminder.sentAt ?? reminder.createdAt)}

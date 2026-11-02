@@ -121,9 +121,9 @@ function MemberProfile({ member }: { member: MemberView }) {
               </div>
             </div>
           </div>
-          <dl className="grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-1 text-sm">
+          <dl className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-x-4 gap-y-1 text-sm">
             <dt className="text-muted-foreground">Email</dt>
-            <dd>{member.email}</dd>
+            <dd className="break-all">{member.email}</dd>
             <dt className="text-muted-foreground">Phone</dt>
             <dd>{member.phone ?? "–"}</dd>
             <dt className="text-muted-foreground">Coach</dt>

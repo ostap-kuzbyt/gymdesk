@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useSession } from "@/auth/session";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { PageHeader } from "@/components/page-header";
+import { RowActions } from "@/components/row-actions";
 import { EmptyState, ErrorNotice, TableSkeleton } from "@/components/query-states";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -82,7 +83,7 @@ export function TariffsPage() {
               <TableHead className="text-right">Price</TableHead>
               <TableHead className="hidden sm:table-cell">Valid for</TableHead>
               <TableHead className="hidden sm:table-cell">Visits</TableHead>
-              {canEdit ? <TableHead className="w-40" /> : null}
+              {canEdit ? <TableHead className="w-20 sm:w-40" /> : null}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -102,7 +103,7 @@ export function TariffsPage() {
                     {formatTerm(tariff.durationDays)} · {formatVisits(tariff.visitLimit)}
                   </div>
                 </TableCell>
-                <TableCell className="text-right font-stamp tabular-nums">
+                <TableCell className="text-right font-stamp whitespace-nowrap tabular-nums">
                   {formatMoney(tariff.priceCents, currency)}
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">
@@ -114,18 +115,10 @@ export function TariffsPage() {
                 {canEdit ? (
                   <TableCell className="text-right">
                     {tariff.archived ? null : (
-                      <>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setDialog({ open: true, tariff })}
-                        >
-                          Edit
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => setToArchive(tariff)}>
-                          Archive
-                        </Button>
-                      </>
+                      <RowActions
+                        onEdit={() => setDialog({ open: true, tariff })}
+                        onArchive={() => setToArchive(tariff)}
+                      />
                     )}
                   </TableCell>
                 ) : null}

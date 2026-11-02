@@ -18,7 +18,7 @@ export function AppLayout() {
     <CommandPaletteProvider>
       <div className="min-h-screen">
         <TopBar />
-        <main className="mx-auto w-full max-w-7xl p-4 sm:p-6">
+        <main className="mx-auto w-full max-w-7xl p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:p-6">
           {me.data && me.data.coachId === null ? (
             <UnlinkedNotice subject={me.data.subject} />
           ) : null}

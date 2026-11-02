@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useSession } from "@/auth/session";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { PageHeader } from "@/components/page-header";
+import { RowActions } from "@/components/row-actions";
 import { EmptyState, ErrorNotice, TableSkeleton } from "@/components/query-states";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -79,7 +80,7 @@ export function CoachesPage() {
             <TableRow>
               <TableHead>Coach</TableHead>
               <TableHead className="hidden sm:table-cell">Working hours</TableHead>
-              {canEdit ? <TableHead className="w-40" /> : null}
+              {canEdit ? <TableHead className="w-20 sm:w-40" /> : null}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -122,18 +123,10 @@ export function CoachesPage() {
                   {canEdit ? (
                     <TableCell className="text-right">
                       {coach.archived ? null : (
-                        <>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setDialog({ open: true, coach })}
-                          >
-                            Edit
-                          </Button>
-                          <Button variant="outline" size="sm" onClick={() => setToArchive(coach)}>
-                            Archive
-                          </Button>
-                        </>
+                        <RowActions
+                          onEdit={() => setDialog({ open: true, coach })}
+                          onArchive={() => setToArchive(coach)}
+                        />
                       )}
                     </TableCell>
                   ) : null}

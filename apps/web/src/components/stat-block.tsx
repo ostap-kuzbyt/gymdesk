@@ -21,7 +21,7 @@ export function StatBlock({ label, value, note, tone = "neutral", compact }: Sta
   return (
     <div
       className={cn(
-        "surface relative flex flex-col gap-2 overflow-hidden bg-gradient-to-br from-card px-5 py-4",
+        "surface relative flex flex-col gap-1.5 overflow-hidden bg-gradient-to-br from-card px-4 py-3 sm:gap-2 sm:px-5 sm:py-4",
         "before:absolute before:-top-10 before:-right-10 before:size-36 before:rounded-full before:opacity-25 before:blur-2xl before:content-['']",
         style.card,
         style.glow,
@@ -30,7 +30,7 @@ export function StatBlock({ label, value, note, tone = "neutral", compact }: Sta
       <span
         className={cn(
           "relative font-stamp leading-none tabular-nums",
-          compact ? "text-5xl" : "text-6xl",
+          compact ? "text-4xl sm:text-5xl" : "text-5xl sm:text-6xl",
           style.value,
         )}
       >

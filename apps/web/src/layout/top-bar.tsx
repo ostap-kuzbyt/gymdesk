@@ -37,7 +37,7 @@ function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="gap-2 px-2" aria-label="Account menu">
+        <Button variant="ghost" className="gap-2 px-1.5 sm:px-2" aria-label="Account menu">
           <span
             aria-hidden
             className="grid size-7 place-items-center rounded-full bg-gradient-to-br from-primary to-teal text-xs font-semibold text-primary-foreground"
@@ -159,11 +159,11 @@ export function TopBar() {
   const { roles } = useSession();
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b border-border bg-card/80 px-3 backdrop-blur-md sm:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-1 border-b border-border bg-card/80 px-3 pt-[env(safe-area-inset-top)] backdrop-blur-md sm:gap-2 sm:px-6">
       <MobileNav />
-      <Link to="/" className="mr-5 flex items-center gap-2 font-stamp text-xl">
+      <Link to="/" className="mr-1 flex items-center gap-2 font-stamp text-xl sm:mr-5">
         <PlateMark />
-        Gymdesk
+        <span className="max-[360px]:sr-only">Gymdesk</span>
       </Link>
       <nav aria-label="Pages" className="hidden items-center gap-1 md:flex">
         {navFor(roles, "main").map((item) => (
@@ -179,7 +179,7 @@ export function TopBar() {
         ))}
         <ClubMenu items={navFor(roles, "club")} />
       </nav>
-      <div className="ml-auto flex items-center gap-1">
+      <div className="ml-auto flex items-center gap-0.5 sm:gap-1">
         <SearchButton />
         <ThemeToggle />
         <UserMenu />

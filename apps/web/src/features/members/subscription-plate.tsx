@@ -11,9 +11,9 @@ export function ActiveUntil({ activeUntil }: { activeUntil: string | null }) {
   const plate = plateFor({ status: "active", startsOn: today, endsOn: activeUntil, today });
 
   return (
-    <span className="flex items-center gap-2.5">
+    <span className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-2.5">
       <PlateBadge {...plate} size="sm" />
-      <span>until {formatDate(activeUntil)}</span>
+      <span className="text-xs sm:text-sm">until {formatDate(activeUntil)}</span>
     </span>
   );
 }

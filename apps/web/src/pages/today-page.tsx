@@ -55,12 +55,12 @@ export function TodayPage() {
 
   return (
     <section className="flex flex-col gap-6">
-      <header className="surface relative flex min-h-72 items-center overflow-hidden bg-gradient-to-br from-card via-plate-blue-soft to-plate-green-soft">
-        <div className="relative z-10 flex flex-col items-start gap-3 px-6 py-8 sm:max-w-[55%] sm:py-10">
+      <header className="surface relative flex flex-col overflow-hidden bg-gradient-to-br from-card via-plate-blue-soft to-plate-green-soft sm:min-h-72 sm:flex-row sm:items-center">
+        <div className="relative z-10 flex flex-col items-start gap-3 px-5 pt-6 pb-2 sm:max-w-[55%] sm:px-6 sm:py-10">
           <p className="text-lg font-medium text-muted-foreground">
             {greetingFor(new Date().getHours())}, {firstName}
           </p>
-          <h1 className="text-6xl">Today</h1>
+          <h1 className="text-5xl sm:text-6xl">Today</h1>
           <p className="text-muted-foreground">{`${WEEKDAY_LONG[weekdayOf(today) - 1]}, ${formatDate(today)}`}</p>
           {frontDesk ? (
             <Button asChild size="lg" className="mt-2 h-11 px-6 text-base">
@@ -68,7 +68,7 @@ export function TodayPage() {
             </Button>
           ) : null}
         </div>
-        <div className="absolute inset-y-0 right-0 hidden w-1/2 sm:block">
+        <div className="relative h-60 w-full sm:absolute sm:inset-y-0 sm:right-0 sm:h-auto sm:w-1/2">
           <LifterHero />
         </div>
       </header>
@@ -93,7 +93,7 @@ export function TodayPage() {
         </div>
       ) : null}
 
-      <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(15rem,1fr))]">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:[grid-template-columns:repeat(auto-fit,minmax(15rem,1fr))] max-sm:[&>*:nth-child(n+3)]:col-span-2">
         {frontDesk ? (
           <StatBlock
             tone="green"

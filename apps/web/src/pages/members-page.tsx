@@ -109,7 +109,7 @@ export function MembersPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Member</TableHead>
-                <TableHead className="text-right">Age</TableHead>
+                <TableHead className="hidden text-right sm:table-cell">Age</TableHead>
                 <TableHead className="hidden sm:table-cell">Phone</TableHead>
                 <TableHead>Subscription</TableHead>
               </TableRow>
@@ -125,9 +125,15 @@ export function MembersPage() {
                     >
                       {member.fullName}
                     </Link>
-                    <div className="text-xs text-muted-foreground">{member.email}</div>
+                    <div className="text-xs break-all text-muted-foreground">{member.email}</div>
+                    <div className="text-xs text-muted-foreground sm:hidden">
+                      {member.age} years old
+                      {member.phone ? ` · ${member.phone}` : ""}
+                    </div>
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">{member.age}</TableCell>
+                  <TableCell className="hidden text-right tabular-nums sm:table-cell">
+                    {member.age}
+                  </TableCell>
                   <TableCell className="hidden text-muted-foreground sm:table-cell">
                     {member.phone ?? "–"}
                   </TableCell>

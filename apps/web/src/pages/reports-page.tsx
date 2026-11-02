@@ -114,7 +114,7 @@ export function ReportsPage() {
       </nav>
 
       <div className="mb-6 flex flex-wrap items-end gap-x-5 gap-y-3">
-        <div className="flex items-end gap-2">
+        <div className="grid w-full grid-cols-1 items-end gap-2 min-[420px]:grid-cols-2 sm:flex sm:w-auto">
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-muted-foreground">From</span>
             <Input
@@ -124,7 +124,7 @@ export function ReportsPage() {
                 isCalendarDate(event.target.value) &&
                 go({ ...search, from: event.target.value, to: range.to, page: undefined })
               }
-              className="h-8 w-40"
+              className="h-8 w-full sm:w-40"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm">
@@ -136,7 +136,7 @@ export function ReportsPage() {
                 isCalendarDate(event.target.value) &&
                 go({ ...search, to: event.target.value, from: range.from, page: undefined })
               }
-              className="h-8 w-40"
+              className="h-8 w-full sm:w-40"
             />
           </label>
         </div>
@@ -234,12 +234,15 @@ function AttendancePanel({
                 >
                   {item.fullName}
                 </Link>
-                <div className="text-xs text-muted-foreground">{item.email}</div>
+                <div className="text-xs break-all text-muted-foreground">{item.email}</div>
               </TableCell>
               <TableCell>
                 <span className="flex items-center gap-3">
                   <span className="w-8 text-right font-stamp tabular-nums">{item.visits}</span>
-                  <span aria-hidden className="h-1.5 w-24 rounded-full bg-muted">
+                  <span
+                    aria-hidden
+                    className="hidden h-1.5 w-24 rounded-full bg-muted min-[480px]:block"
+                  >
                     <span
                       className="block h-full rounded-full bg-plate-blue"
                       style={{ width: `${(item.visits / busiest) * 100}%` }}
@@ -367,7 +370,7 @@ function RevenuePanel({
             <TableRow key={row.period}>
               <TableCell className="font-medium">{periodLabel(row.period)}</TableCell>
               <TableCell className="text-right tabular-nums">{row.subscriptions}</TableCell>
-              <TableCell className="text-right font-stamp tabular-nums">
+              <TableCell className="text-right font-stamp whitespace-nowrap tabular-nums">
                 {formatMoney(row.revenueCents, currency)}
               </TableCell>
             </TableRow>

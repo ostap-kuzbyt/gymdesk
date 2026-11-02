@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useSession } from "@/auth/session";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { PageHeader } from "@/components/page-header";
+import { RowActions } from "@/components/row-actions";
 import { EmptyState, ErrorNotice, TableSkeleton } from "@/components/query-states";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -77,7 +78,7 @@ export function StudiosPage() {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Capacity</TableHead>
-              {canEdit ? <TableHead className="w-40" /> : null}
+              {canEdit ? <TableHead className="w-20 sm:w-40" /> : null}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -100,18 +101,10 @@ export function StudiosPage() {
                 {canEdit ? (
                   <TableCell className="text-right">
                     {studio.archived ? null : (
-                      <>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setDialog({ open: true, studio })}
-                        >
-                          Edit
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => setToArchive(studio)}>
-                          Archive
-                        </Button>
-                      </>
+                      <RowActions
+                        onEdit={() => setDialog({ open: true, studio })}
+                        onArchive={() => setToArchive(studio)}
+                      />
                     )}
                   </TableCell>
                 ) : null}
