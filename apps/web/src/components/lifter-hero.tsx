@@ -1,7 +1,10 @@
-import { Suspense, lazy, useRef, useState } from "react";
+import { Suspense, lazy, useCallback, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import { PlateMark } from "@/components/plate-mark";
+import { GigachadGif } from "@/components/gigachad-gif";
 import { SceneBoundary, prefersReducedMotion, supportsWebGl } from "@/components/webgl";
+import { PUMP_PER_CLICK, PUMP_RESET, newControls } from "@/features/scenes/lifter-sim";
+import type { Mood } from "@/features/scenes/lifter-sim";
 import { cn } from "@/lib/utils";
 
 const LifterScene = lazy(() => import("@/features/scenes/lifter"));
@@ -17,14 +20,31 @@ function StaticPlate() {
   );
 }
 
+function hintFor(reps: number, mood: Mood): string {
+  if (mood === "crushed") return "He gave up! Click to save him";
+  if (mood === "stuck") return "He's stuck! Click to help";
+  if (reps === 0) return "Click to push";
+  return `${reps} ${reps === 1 ? "rep" : "reps"}`;
+}
+
 export function LifterHero({ className }: { className?: string }) {
-  const energy = useRef(0);
+  const controls = useRef(newControls());
   const [reps, setReps] = useState(0);
+  const [mood, setMood] = useState<Mood>("idle");
+  const [gif, setGif] = useState(false);
   const interactive = supportsWebGl();
 
   const push = () => {
-    energy.current = Math.min(MAX_ENERGY, energy.current + PUSH);
+    controls.current.energy = Math.min(MAX_ENERGY, controls.current.energy + PUSH);
+    controls.current.boost += PUMP_PER_CLICK;
   };
+
+  const closeGif = useCallback(() => {
+    setGif(false);
+    controls.current.resetPump = PUMP_RESET;
+  }, []);
+
+  const onMax = () => setGif(true);
 
   const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === " " || event.key === "Enter") {
@@ -57,13 +77,27 @@ export function LifterHero({ className }: { className?: string }) {
         className,
       )}
     >
-      <SceneBoundary fallback={<StaticPlate />}>
-        <Suspense fallback={<StaticPlate />}>
-          <LifterScene energy={energy} onRep={setReps} still={prefersReducedMotion()} />
-        </Suspense>
-      </SceneBoundary>
-      <p className="pointer-events-none absolute right-3 bottom-3 rounded-full bg-card/85 px-3 py-1 text-sm font-medium shadow-sm backdrop-blur">
-        {reps === 0 ? "Click to push" : `${reps} ${reps === 1 ? "rep" : "reps"}`}
+      <div className="size-full">
+        <SceneBoundary fallback={<StaticPlate />}>
+          <Suspense fallback={<StaticPlate />}>
+            <LifterScene
+              controls={controls}
+              onRep={setReps}
+              onMood={setMood}
+              onMax={onMax}
+              still={prefersReducedMotion()}
+            />
+          </Suspense>
+        </SceneBoundary>
+      </div>
+      {gif ? <GigachadGif onFinished={closeGif} /> : null}
+      <p
+        className={cn(
+          "pointer-events-none absolute right-3 bottom-3 rounded-full bg-card/85 px-3 py-1 text-sm font-medium shadow-sm backdrop-blur",
+          mood !== "idle" && "bg-plate-red-soft text-plate-red",
+        )}
+      >
+        {hintFor(reps, mood)}
       </p>
     </div>
   );
